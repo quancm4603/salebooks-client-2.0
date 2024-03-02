@@ -1,5 +1,6 @@
 import { useState } from 'react';
-
+import { useNavigate } from 'react-router-dom';
+import PropTypes from 'prop-types';
 import Box from '@mui/material/Box';
 import Avatar from '@mui/material/Avatar';
 import Divider from '@mui/material/Divider';
@@ -10,6 +11,8 @@ import Typography from '@mui/material/Typography';
 import IconButton from '@mui/material/IconButton';
 
 import { account } from 'src/_mock/account';
+
+import { API_BASE_URL } from '../../../../config'; // Import your API_BASE_URL
 
 // ----------------------------------------------------------------------
 
@@ -30,8 +33,10 @@ const MENU_OPTIONS = [
 
 // ----------------------------------------------------------------------
 
-export default function AccountPopover() {
+export default function AccountPopover(props) {
   const [open, setOpen] = useState(null);
+  const { loggedIn, setLoggedIn, setToken } = props;
+  const navigate = useNavigate();
 
   const handleOpen = (event) => {
     setOpen(event.currentTarget);
@@ -39,6 +44,19 @@ export default function AccountPopover() {
 
   const handleClose = () => {
     setOpen(null);
+  };
+
+  const handleLogout = () => {
+    // Log out logic goes here
+    fetch(`${API_BASE_URL}/api/account/logout`, {
+      method: 'POST',
+    });
+    localStorage.removeItem('jwttoken'); // Remove token from localStorage on logout
+    sessionStorage.removeItem('email'); // Remove email from sessionStorage on logout
+    setLoggedIn(false);
+    setToken('');
+    console.log('Logged out');
+    navigate('/login');
   };
 
   return (
@@ -105,7 +123,7 @@ export default function AccountPopover() {
         <MenuItem
           disableRipple
           disableTouchRipple
-          onClick={handleClose}
+          onClick={handleLogout}
           sx={{ typography: 'body2', color: 'error.main', py: 1.5 }}
         >
           Logout
@@ -114,3 +132,8 @@ export default function AccountPopover() {
     </>
   );
 }
+AccountPopover.propTypes = {
+  loggedIn: PropTypes.bool.isRequired,
+  setLoggedIn: PropTypes.func.isRequired,
+  setToken: PropTypes.func.isRequired,
+};

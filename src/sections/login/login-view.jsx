@@ -1,5 +1,5 @@
-import { useState, useHistory } from 'react';
-import { useNavigate } from "react-router-dom";
+import { useState, useEffect } from 'react';
+import PropTypes from 'prop-types';
 import Box from '@mui/material/Box';
 import Link from '@mui/material/Link';
 import Card from '@mui/material/Card';
@@ -13,18 +13,13 @@ import LoadingButton from '@mui/lab/LoadingButton';
 import { alpha, useTheme } from '@mui/material/styles';
 import InputAdornment from '@mui/material/InputAdornment';
 
-import { useRouter } from 'src/routes/hooks';
-
+import { useNavigate } from 'react-router-dom';
 import { bgGradient } from 'src/theme/css';
-
 import Logo from 'src/components/logo';
 import Iconify from 'src/components/iconify';
-import { toast } from 'react-toastify';  // Import toast from react-toastify for notifications
-import Swal from 'sweetalert2';  // Import Swal for custom alerts
-
-import { API_BASE_URL } from '../../../config';  // Import your API_BASE_URL
-
-// ----------------------------------------------------------------------
+import { toast } from 'react-toastify';
+import Swal from 'sweetalert2';
+import { API_BASE_URL } from '../../../config';
 
 export default function LoginView() {
   const theme = useTheme();
@@ -32,7 +27,43 @@ export default function LoginView() {
 
   const [showPassword, setShowPassword] = useState(false);
 
+  useEffect(() => {
+    console.log('Checking authentication...');
+    const checkAuthentication = async () => {
+      try {
+        const token = localStorage.getItem('jwttoken');
+
+        if (token) {
+          const response = await fetch(`${API_BASE_URL}/api/account/isLogin`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ token }),
+          });
+
+          if (response.ok) {
+            navigate('/'); // Navigate to home page if authenticated
+          } else {
+            localStorage.removeItem('jwttoken');
+            sessionStorage.removeItem('email');
+            navigate('/login');
+          }
+        } else {
+          localStorage.removeItem('jwttoken');
+          sessionStorage.removeItem('email');
+        }
+      } catch (error) {
+        console.error('Error checking authentication:', error);
+        localStorage.removeItem('jwttoken');
+        sessionStorage.removeItem('email');
+      }
+    };
+
+    // Check authentication on component mount
+    checkAuthentication();
+  }, [navigate]);
+
   const handleLogin = async (e) => {
+    console.log('Logging in...');
     e.preventDefault();
 
     const email = e.target.email.value;
@@ -42,11 +73,10 @@ export default function LoginView() {
       const response = await fetch(`${API_BASE_URL}/api/account/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password })
+        body: JSON.stringify({ email, password }),
       });
 
       if (!response.ok) {
-        // Use SweetAlert2 to show a custom alert for login failure
         Swal.fire({
           icon: 'error',
           title: 'Login Failed',
@@ -56,15 +86,12 @@ export default function LoginView() {
       }
 
       const { token } = await response.json();
-      toast.success('Login successful');
+      console.log('Token:', token);
 
-      // Store the token in a more secure way (e.g., HTTP-only cookie)
-      // Store the token in local storage
       localStorage.setItem('jwttoken', token);
-      // Store the email in session storage
       sessionStorage.setItem('email', email);
-
-      navigate('/');  // Use history to navigate to the dashboard
+      console.log('Logged in');
+      navigate('/'); // Navigate to home page
     } catch (error) {
       toast.error(`Login Failed: ${error.message}`);
     }
@@ -84,7 +111,6 @@ export default function LoginView() {
               endAdornment: (
                 <InputAdornment position="end">
                   <IconButton onClick={() => setShowPassword(!showPassword)} edge="end">
-                    {/* You can use your eye icon here */}
                     {showPassword ? '👁️' : '👁️'}
                   </IconButton>
                 </InputAdornment>
@@ -99,13 +125,7 @@ export default function LoginView() {
           </Link>
         </Stack>
 
-        <LoadingButton
-          fullWidth
-          size="large"
-          type="submit"
-          variant="contained"
-          color="inherit"
-        >
+        <LoadingButton fullWidth size="large" type="submit" variant="contained" color="inherit">
           Login
         </LoadingButton>
       </form>
@@ -153,7 +173,6 @@ export default function LoginView() {
               size="large"
               color="inherit"
               variant="outlined"
-              sx={{ borderColor: alpha(theme.palette.grey[500], 0.16) }}
             >
               <Iconify icon="eva:google-fill" color="#DF3E30" />
             </Button>
@@ -163,7 +182,6 @@ export default function LoginView() {
               size="large"
               color="inherit"
               variant="outlined"
-              sx={{ borderColor: alpha(theme.palette.grey[500], 0.16) }}
             >
               <Iconify icon="eva:facebook-fill" color="#1877F2" />
             </Button>
@@ -173,7 +191,6 @@ export default function LoginView() {
               size="large"
               color="inherit"
               variant="outlined"
-              sx={{ borderColor: alpha(theme.palette.grey[500], 0.16) }}
             >
               <Iconify icon="eva:twitter-fill" color="#1C9CEA" />
             </Button>
