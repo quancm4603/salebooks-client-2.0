@@ -27,6 +27,11 @@ export default function LoginView() {
 
   const [showPassword, setShowPassword] = useState(false);
 
+  const handleForget = () => {
+    console.log("chuyen page")
+    navigate('/forget');
+  };
+
   useEffect(() => {
     console.log('Checking authentication...');
     const checkAuthentication = async () => {
@@ -68,6 +73,7 @@ export default function LoginView() {
 
     const email = e.target.email.value;
     const password = e.target.password.value;
+    
 
     try {
       const response = await fetch(`${API_BASE_URL}/api/account/login`, {
@@ -119,16 +125,15 @@ export default function LoginView() {
           />
         </Stack>
 
-        <Stack direction="row" alignItems="center" justifyContent="flex-end" sx={{ my: 3 }}>
-          <Link variant="subtitle2" underline="hover">
-            Forgot password?
-          </Link>
-        </Stack>
-
         <LoadingButton fullWidth size="large" type="submit" variant="contained" color="inherit">
           Login
         </LoadingButton>
       </form>
+      <Stack direction="row" alignItems="center" justifyContent="flex-end" sx={{ my: 3 }}>
+        <Link onClick={handleForget} variant="subtitle2" underline="hover">
+          Forgot password
+        </Link>
+      </Stack>
     </>
   );
 

@@ -12,6 +12,9 @@ export const LoginPage = lazy(() => import('src/pages/login'));
 export const ProductsPage = lazy(() => import('src/pages/products'));
 export const Page404 = lazy(() => import('src/pages/page-not-found'));
 
+export const ForgetPage = lazy(() => import('src/pages/forget'));
+export const VerifyPage = lazy(() => import('src/pages/verify-otp'))
+
 
 // ----------------------------------------------------------------------
 
@@ -79,6 +82,14 @@ export default function Router() {
     {
       path: 'login',
       element: <LoginPage />
+    },
+    {
+      path: 'forget',
+      element: <ForgetPage />,
+    },
+    {
+      path: 'verify',
+      element: <VerifyPage/>,
     },
     {
       path: '404',
