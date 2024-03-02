@@ -1,5 +1,5 @@
 import PropTypes from 'prop-types';
-
+import { useEffect, useState } from 'react';
 import Box from '@mui/material/Box';
 import Stack from '@mui/material/Stack';
 import AppBar from '@mui/material/AppBar';
@@ -23,6 +23,22 @@ import NotificationsPopover from './common/notifications-popover';
 
 export default function Header({ onOpenNav }) {
   const theme = useTheme();
+  const [loggedIn, setLoggedIn] = useState(false);
+  const [email, setEmail] = useState("");
+  const [token, setToken] = useState("");
+
+  useEffect(() => {
+    // Check if the user is already authenticated (e.g., by checking a token in local storage)
+    const isAuthenticated = localStorage.getItem('token'); // Replace 'token' with your actual storage key
+    // get local storage email
+    const storedEmail = sessionStorage.getItem('email');
+
+    if (isAuthenticated) {
+      setLoggedIn(true);
+      setToken(isAuthenticated);
+      setEmail(storedEmail);
+    }
+  }, []);
 
   const lgUp = useResponsive('up', 'lg');
 
@@ -41,7 +57,7 @@ export default function Header({ onOpenNav }) {
       <Stack direction="row" alignItems="center" spacing={1}>
         <LanguagePopover />
         <NotificationsPopover />
-        <AccountPopover />
+        <AccountPopover loggedIn={loggedIn} setLoggedIn={setLoggedIn} token={token} setToken={setToken}/>
       </Stack>
     </>
   );
