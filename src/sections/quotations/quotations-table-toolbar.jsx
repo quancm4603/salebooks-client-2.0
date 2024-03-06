@@ -14,7 +14,7 @@ import { API_BASE_URL } from '../../../config';
 
 // ----------------------------------------------------------------------
 
-export default function QuotationTableToolbar({ numSelected, filterName, onFilterName, onDelete }) {
+export default function QuotationTableToolbar({ numSelected, filterName, onFilterName, onDelete, onExportToExcel }) {
   const [loading, setLoading] = useState(false);
 
   const handleDelete = async (id) => {
@@ -54,16 +54,10 @@ export default function QuotationTableToolbar({ numSelected, filterName, onFilte
         />
       )}
 
-      {numSelected > 0 ? (
-        <Tooltip title="Cancel">
-          <IconButton onClick={handleDelete} disabled={loading}>
-            <Iconify icon="eva-close-fill" />
-          </IconButton>
-        </Tooltip>
-      ) : (
-        <Tooltip title="Filter list">
-          <IconButton>
-            <Iconify icon="ic:round-filter-list" />
+      {numSelected > 0 && (
+        <Tooltip title="Export to Excel">
+          <IconButton onClick={onExportToExcel}>
+            <Iconify icon="eva-save-fill" />
           </IconButton>
         </Tooltip>
       )}
@@ -76,4 +70,5 @@ QuotationTableToolbar.propTypes = {
   filterName: PropTypes.string,
   onFilterName: PropTypes.func,
   onDelete: PropTypes.func,
+  onExportToExcel: PropTypes.func.isRequired,
 };

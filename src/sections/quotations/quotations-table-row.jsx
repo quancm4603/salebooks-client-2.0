@@ -2,6 +2,8 @@ import { useNavigate } from 'react-router-dom';
 import React, { useState, useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
 
+import Swal from 'sweetalert2'
+
 import Stack from '@mui/material/Stack';
 import Popover from '@mui/material/Popover';
 import TableRow from '@mui/material/TableRow';
@@ -93,7 +95,6 @@ export default function QuotationTableRow({
     setAnchorEl(null);
   };
 
-
   const handleConfirmQuotation = async (num) => {
     try {
       const token = localStorage.getItem('jwttoken');
@@ -110,8 +111,19 @@ export default function QuotationTableRow({
         updateQuotationStatus(num, 'To Invoice');
         handleCloseConfirmDialog();
         handleCloseMenu();
+        Swal.fire({
+          title: "Confirmed!",
+          text: "Confirm quotation successfully!",
+          icon: "success"
+        });
       } else {
         console.error('Failed to confirm quotation.');
+        handleCloseMenu();
+        Swal.fire({
+          icon: 'error',
+          title: 'Failed!',
+          text: 'Failed to confirm quotation!',
+        });
       }
     } catch (error) {
       console.error('Error confirming quotation:', error);
@@ -134,8 +146,19 @@ export default function QuotationTableRow({
         updateQuotationStatus(num, 'Cancelled');
         handleCloseCancelDialog();
         handleCloseMenu();
+        Swal.fire({
+          title: "Canceled!",
+          text: "Cancel quotation successfully!",
+          icon: "success"
+        });
       } else {
         console.error('Failed to cancel quotation.');
+        handleCloseMenu();
+        Swal.fire({
+          icon: 'error',
+          title: 'Failed!',
+          text: 'Failed to cancel quotation!',
+        });
       }
     } catch (error) {
       console.error('Error canceling quotation:', error);
@@ -195,7 +218,23 @@ export default function QuotationTableRow({
         </TableCell>
 
         <TableCell>
-          <Label color={(status === 'Cancelled' && 'error') || ('primary')}>{status}</Label>
+          {(() => {
+            let labelColor = 'primary';
+
+            if (status === 'Cancelled') {
+              labelColor = 'error';
+            } else if (status === 'To Invoice') {
+              labelColor = 'warning';
+            } else if (status === 'Fully Invoice') {
+              labelColor = 'success';
+            }
+
+            return (
+              <Label color={labelColor}>
+                {status}
+              </Label>
+            );
+          })()}
         </TableCell>
 
         <TableCell>{formatCreatedAt(createAt)}</TableCell>
@@ -236,7 +275,8 @@ export default function QuotationTableRow({
                       <TableRow>
                         <TableCell>Product</TableCell>
                         <TableCell>Quantity</TableCell>
-                        <TableCell>SubTotal($)</TableCell>
+                        <TableCell>SubTotal</TableCell>
+                        <TableCell>Tax</TableCell>
                       </TableRow>
                     </TableHead>
                     <TableBody>
@@ -245,6 +285,7 @@ export default function QuotationTableRow({
                           <TableCell>{detail.product.name}</TableCell>
                           <TableCell>{detail.quantity}</TableCell>
                           <TableCell>{detail.subTotal}VNĐ</TableCell>
+                          <TableCell>{detail.product.tax * 100}%</TableCell>
                         </TableRow>
                       ))}
                     </TableBody>
@@ -253,7 +294,7 @@ export default function QuotationTableRow({
                         <TableCell colSpan={2} className="text-right">
                           <Typography variant="strong">Total:</Typography>
                         </TableCell>
-                        <TableCell>{total}VND</TableCell>
+                        <TableCell>{total}VNĐ</TableCell>
                       </TableRow>
                     </TableBody>
                   </Table>
@@ -268,10 +309,12 @@ export default function QuotationTableRow({
           </DialogActions>
         </Dialog>
 
-        <MenuItem onClick={handleOpenConfirmDialog} sx={{ color: 'success.main' }}>
-          <Iconify icon="eva:edit-fill" sx={{ mr: 2 }} />
-          Confirm
-        </MenuItem>
+        {status === 'Quotation' && (
+          <MenuItem onClick={handleOpenConfirmDialog} sx={{ color: 'success.main' }}>
+            <Iconify icon="eva:edit-fill" sx={{ mr: 2 }} />
+            Confirm
+          </MenuItem>
+        )}
 
         <Dialog open={openConfirmDialog} onClose={handleCloseConfirmDialog}>
           <DialogTitle>Confirm</DialogTitle>
@@ -286,15 +329,19 @@ export default function QuotationTableRow({
           </DialogActions>
         </Dialog>
 
-        <MenuItem onClick={handleCloseMenu} sx={{ color: 'primary.main' }}>
-          <Iconify icon="eva-navigation-2-fill" sx={{ mr: 2 }} />
-          Send
-        </MenuItem>
+        {status === 'Quotation' && (
+          <MenuItem onClick={handleCloseMenu} sx={{ color: 'primary.main' }}>
+            <Iconify icon="eva-navigation-2-fill" sx={{ mr: 2 }} />
+            Send
+          </MenuItem>
+        )}
 
-        <MenuItem onClick={handleOpenCancelDialog} sx={{ color: 'error.main' }}>
-          <Iconify icon="eva-close-square-outline" sx={{ mr: 2 }} />
-          Cancel
-        </MenuItem>
+        {status === 'Quotation' && (
+          <MenuItem onClick={handleOpenCancelDialog} sx={{ color: 'error.main' }}>
+            <Iconify icon="eva-close-square-outline" sx={{ mr: 2 }} />
+            Cancel
+          </MenuItem>
+        )}
 
         <Dialog open={openCancelDialog} onClose={handleCloseCancelDialog}>
           <DialogTitle>Cancel</DialogTitle>
@@ -325,7 +372,6 @@ QuotationTableRow.propTypes = {
   handleClick: PropTypes.func,
   updateQuotationStatus: PropTypes.func,
 };
-
 
 function formatCreatedAt(createdAt) {
   const date = new Date(createdAt);
