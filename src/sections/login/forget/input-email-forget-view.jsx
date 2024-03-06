@@ -6,23 +6,24 @@ import Stack from '@mui/material/Stack';
 import LoadingButton from '@mui/lab/LoadingButton';
 import Typography from '@mui/material/Typography';
 import { TextField, Button, Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material';
+import { useNavigate } from 'react-router-dom';
+
 import { API_BASE_URL } from '../../../../config';
+
 
 export default function EnterEmail() {
   const [email, setEmail] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [openDialog, setOpenDialog] = useState(false);
-  const [otp, setOTP] = useState('');
+  const [otp, setOtp] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [userId, setUserId] = useState(null); // State to store UserId
+  const navigate = useNavigate();
 
   const handleEmailChange = (event) => {
     setEmail(event.target.value);
-  };
-
-  const handleOTPChange = (event) => {
-    setOTP(event.target.value);
   };
 
   const handleCheckEmail = async () => {
@@ -33,7 +34,8 @@ export default function EnterEmail() {
 
       const response = await axios.post(`${API_BASE_URL}/api/Mail/forget`, formData);
       
-      if (response.data === 'Email exists') {
+      if (response.data) {
+        setUserId(response.data); // Store UserId
         setOpenDialog(true);
       } else {
         setError('Email does not exist');
@@ -53,6 +55,7 @@ export default function EnterEmail() {
   const handlePasswordChangeSubmit = async () => {
     try {
       const formData = new FormData();
+      formData.append('UserId', userId); // Include UserId in form data
       formData.append('EnteredOTP', otp);
       formData.append('Password', password);
       formData.append('NewPassword', confirmPassword);
@@ -65,7 +68,8 @@ export default function EnterEmail() {
 
       if (response.status >= 200 && response.status < 300) {
         // You need to define navigate function for redirection
-        // navigate('/');
+        navigate('/');
+
       } else {
         const responseData = await response.json();
         setError(responseData.message || 'An error occurred.');
@@ -132,7 +136,7 @@ export default function EnterEmail() {
                       label="OTP"
                       type="text"
                       value={otp}
-                      onChange={(e) => setOTP(e.target.value)}
+                      onChange={(e) => setOtp(e.target.value)}
                       required
                     />
                     <TextField
