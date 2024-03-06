@@ -7,6 +7,7 @@ import LoadingButton from '@mui/lab/LoadingButton';
 import Typography from '@mui/material/Typography';
 import { TextField, Button, Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
+
 import { API_BASE_URL } from '../../../../config';
 
 
@@ -68,6 +69,7 @@ export default function EnterEmail() {
       if (response.status >= 200 && response.status < 300) {
         // You need to define navigate function for redirection
         navigate('/');
+
       } else {
         const responseData = await response.json();
         setError(responseData.message || 'An error occurred.');
@@ -78,7 +80,6 @@ export default function EnterEmail() {
     }
     handleCloseDialog();
   };
-
 
 
   return (

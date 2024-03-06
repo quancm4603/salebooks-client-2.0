@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 
 import Box from '@mui/material/Box';
@@ -15,13 +15,14 @@ import { RouterLink } from 'src/routes/components';
 
 import { useResponsive } from 'src/hooks/use-responsive';
 
-import { account } from 'src/_mock/account';
+// import { account } from 'src/_mock/account';
 
 import Logo from 'src/components/logo';
 import Scrollbar from 'src/components/scrollbar';
 
 import { NAV } from './config-layout';
 import navConfig from './config-navigation';
+import { API_BASE_URL } from '../../../config';
 
 // ----------------------------------------------------------------------
 
@@ -30,12 +31,45 @@ export default function Nav({ openNav, onCloseNav }) {
 
   const upLg = useResponsive('up', 'lg');
 
+  const [account, setAccount] = useState({});
+
   useEffect(() => {
     if (openNav) {
       onCloseNav();
     }
+    const token = localStorage.getItem('jwttoken');
+    const fetchAccountInfo = async () => {
+      try {
+        const response = await fetch(`${API_BASE_URL}/api/Account/accountInfo`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`, // Replace with your actual access token
+          },
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          setAccount({
+            displayName: data.name,
+            role: data.role === true ? 'Admin' : 'User',
+            photoURL: '', // Set the photoURL if available, or leave it empty for now
+          });
+        } else {
+          // Handle error
+          console.error('Error fetching account info:', response.statusText);
+        }
+      } catch (error) {
+        // Handle error
+        console.error('Error fetching account info:', error.message);
+      }
+    };
+
+    fetchAccountInfo();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pathname]);
+  }, [pathname, openNav]);
+
+  
 
   const renderAccount = (
     <Box

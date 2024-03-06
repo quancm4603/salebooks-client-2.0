@@ -13,17 +13,25 @@ import { alpha, useTheme } from '@mui/material/styles';
 import InputAdornment from '@mui/material/InputAdornment';
 
 import { useNavigate } from 'react-router-dom';
-import { bgGradient } from 'src/theme/css';
-import Logo from 'src/components/logo';
-import Iconify from 'src/components/iconify';
-import { toast } from 'react-toastify';
+
 import Swal from 'sweetalert2';
+import { toast } from 'react-toastify';
+
+import { bgGradient } from 'src/theme/css';
+
+import Logo from 'src/components/logo';
+
 import { API_BASE_URL } from '../../../config';
 
 export default function LoginView( { isAuthenticated, updateAuthentication } ) {
   const theme = useTheme();
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
+
+  const handleForget = () => {
+    console.log("chuyen page")
+    navigate('/forget');
+  };
 
     useEffect(() => {
       console.log(isAuthenticated);
