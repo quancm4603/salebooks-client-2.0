@@ -4,6 +4,8 @@ import DashboardLayout from 'src/layouts/dashboard';
 import LoginView from 'src/sections/login/login-view';
 
 import { API_BASE_URL } from '../../config';
+import FirebaseImageUpload from 'src/utils/FirebaseImageUpload';
+
 
 export const IndexPage = lazy(() => import('src/pages/app'));
 export const BlogPage = lazy(() => import('src/pages/blog'));
@@ -102,6 +104,10 @@ export default function Router() {
     {
       path: '*',
       element: <Navigate to="/404" replace />,
+    },
+    {
+      path: '/upload',
+      element: <FirebaseImageUpload/>,
     },
   ]);
 
