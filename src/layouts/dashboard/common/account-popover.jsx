@@ -1,7 +1,7 @@
-import { useState } from 'react';
-import PropTypes from 'prop-types';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
+import PropTypes from 'prop-types';
 import Box from '@mui/material/Box';
 import Avatar from '@mui/material/Avatar';
 import Divider from '@mui/material/Divider';
@@ -11,10 +11,9 @@ import MenuItem from '@mui/material/MenuItem';
 import Typography from '@mui/material/Typography';
 import IconButton from '@mui/material/IconButton';
 
-import { account } from 'src/_mock/account';
+// import { account } from 'src/_mock/account';
 
 import { API_BASE_URL } from '../../../../config'; // Import your API_BASE_URL
-
 // ----------------------------------------------------------------------
 
 const MENU_OPTIONS = [
@@ -44,6 +43,7 @@ AccountPopover.propTypes = {
 export default function AccountPopover({ loggedIn, setLoggedIn, token, setToken }) {
   const [open, setOpen] = useState(null);
   const navigate = useNavigate();
+  const [account, setAccount] = useState({});
 
   const handleOpen = (event) => {
     setOpen(event.currentTarget);
@@ -65,6 +65,39 @@ export default function AccountPopover({ loggedIn, setLoggedIn, token, setToken 
     // Navigate to the login page
     window.location.href = '/login'; // You can use react-router-dom's history for navigation as well
   };
+
+  
+
+  useEffect(() => {
+    setToken(localStorage.getItem('jwttoken'));
+    const getAccountInfo = async () => {
+      try {
+        const response = await fetch(`${API_BASE_URL}/api/Account/accountInfo`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
+          },
+        });
+    
+        if (response.ok) {
+          const data = await response.json();
+          setAccount({
+            displayName: data.name,
+            role: data.role === true ? 'Admin' : 'User',
+            email: data.email,
+          });
+        } else {
+          console.error('Error fetching account info:', response.statusText);
+          // You can handle the error here, or leave it empty
+        }
+      } catch (error) {
+        console.error('Error fetching account info:', error.message);
+        // You can handle the error here, or leave it empty
+      }
+    };
+    getAccountInfo();
+  }, [token, setToken]);
 
   return (
     <>
@@ -89,7 +122,7 @@ export default function AccountPopover({ loggedIn, setLoggedIn, token, setToken 
             border: (theme) => `solid 2px ${theme.palette.background.default}`,
           }}
         >
-          {account.displayName.charAt(0).toUpperCase()}
+          {account.displayName}
         </Avatar>
       </IconButton>
 
