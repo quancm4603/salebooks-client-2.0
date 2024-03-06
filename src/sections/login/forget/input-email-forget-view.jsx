@@ -1,14 +1,17 @@
 import axios from 'axios';
+import Swal from 'sweetalert2';
 import React, { useState } from 'react';
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
+import InputAdornment from '@mui/material/InputAdornment';
+import IconButton from '@mui/material/IconButton';
 import Stack from '@mui/material/Stack';
-import LoadingButton from '@mui/lab/LoadingButton';
+import LinearProgress from '@mui/material/LinearProgress'; // Thêm LinearProgress
+import { LoadingButton } from '@mui/lab';
 import Typography from '@mui/material/Typography';
 import { TextField, Button, Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import { API_BASE_URL } from '../../../../config';
-
 
 export default function EnterEmail() {
   const [email, setEmail] = useState('');
@@ -17,8 +20,11 @@ export default function EnterEmail() {
   const [openDialog, setOpenDialog] = useState(false);
   const [otp, setOtp] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [confirmPassword, setConfirmPassword] = useState('');
   const [userId, setUserId] = useState(null); // State to store UserId
+  const [otpMismatch, setOtpMismatch] = useState(false); // State to track OTP mismatch
+  const [checkingEmail, setCheckingEmail] = useState(false); // State to track email checking
   const navigate = useNavigate();
 
   const handleEmailChange = (event) => {
@@ -27,12 +33,12 @@ export default function EnterEmail() {
 
   const handleCheckEmail = async () => {
     try {
-      setLoading(true);
+      setCheckingEmail(true); // Bắt đầu kiểm tra email
       const formData = new FormData();
       formData.append('ToEmail', email);
 
       const response = await axios.post(`${API_BASE_URL}/api/Mail/forget`, formData);
-      
+
       if (response.data) {
         setUserId(response.data); // Store UserId
         setOpenDialog(true);
@@ -40,15 +46,23 @@ export default function EnterEmail() {
         setError('Email does not exist');
       }
     } catch (exception) {
-      console.error('Error:', exception);
-      setError('Error occurred. Please try again later.');
+      Swal.fire({
+        icon: "error",
+        title: "Oops...",
+        text: "Email is Wrong!",
+      });
+      setError('Email is Wrong!.');
     } finally {
-      setLoading(false);
+      setCheckingEmail(false); // Kết thúc kiểm tra email
     }
   };
 
   const handleCloseDialog = () => {
     setOpenDialog(false);
+    setOtp('');
+    setPassword('');
+    setConfirmPassword('');
+    setOtpMismatch(false); // Reset OTP mismatch state
   };
 
   const handlePasswordChangeSubmit = async () => {
@@ -58,35 +72,64 @@ export default function EnterEmail() {
       formData.append('EnteredOTP', otp);
       formData.append('Password', password);
       formData.append('NewPassword', confirmPassword);
-      
-      const response = await axios.post(`${API_BASE_URL}/api/Mail/verify-otp`, formData);
+
       if (!otp || !password || !confirmPassword) {
-        setError('Please fill in all fields.');
+        handleCloseDialog();
+        Swal.fire({
+          icon: "error",
+          title: "Oops...",
+          text: "Fill in all fields!",
+        });
         return;
       }
 
+      if (password !== confirmPassword) {
+        setOtpMismatch(true); // Set OTP mismatch state
+        handleCloseDialog();
+        Swal.fire({
+          icon: "error",
+          title: "Oops...",
+          text: "Passwords do not match!",
+        });
+        return;
+      }
+
+      const response = await axios.post(`${API_BASE_URL}/api/Mail/verify-otp`, formData);
       if (response.status >= 200 && response.status < 300) {
-        // You need to define navigate function for redirection
-        navigate('/');
+        handleCloseDialog();
+        Swal.fire({
+          title: "Done!",
+          text: "Password changed successfully!",
+          icon: "success"
+        }).then(() => {
+          navigate('/');
+        });
       } else {
-        const responseData = await response.json();
-        setError(responseData.message || 'An error occurred.');
+        handleCloseDialog();
+        Swal.fire({
+          icon: "error",
+          title: "Oops...",
+          text: "Something went wrong!",
+          footer: '<a href="#">Why do I have this issue?</a>'
+        });
       }
     } catch (exception) {
-      console.error('Error:', exception);
-      setError('An error occurred.');
+      handleCloseDialog();
+      setOtpMismatch(true); // Set OTP mismatch state
+      Swal.fire({
+        icon: "error",
+        title: "Oops...",
+        text: "OTP is Wrong!",
+      });
     }
-    handleCloseDialog();
   };
-
-
 
   return (
     <Box>
       <Stack alignItems="center" justifyContent="center" sx={{ height: '100vh' }} spacing={3}>
         <Card sx={{ p: 5, width: 1, maxWidth: 420 }}>
           <Typography variant="h4">Your Email Forget</Typography>
-          <form>
+          <form >
             <Stack spacing={3}>
               <TextField
                 fullWidth
@@ -98,24 +141,19 @@ export default function EnterEmail() {
                 required
               />
             </Stack>
-            <LoadingButton
+            {checkingEmail && <LinearProgress color="secondary" fourColor variant="indeterminate" />} {/* Thay thế LoadingButton bằng LinearProgress */}
+            <Button // Thay thế LoadingButton bằng Button để tạm thời vô hiệu hóa nút khi đang kiểm tra email
               fullWidth
               size="large"
-              type="submit"
               variant="contained"
               color="inherit"
-              // Show loading animation if loading state is true
-              loading={loading}
-              // Disabled button if loading state is true
-              disabled={loading}
+              disabled={checkingEmail} // Disable nút khi đang kiểm tra email
               onClick={handleCheckEmail}
             >
               Submit
-            </LoadingButton>
-            {/* Show error message if there is an error */}
+            </Button>
             {error && <Typography variant="body1" color="error">{error}</Typography>}
           </form>
-
 
           <Dialog open={openDialog} onClose={handleCloseDialog}>
             <Stack alignItems="center" justifyContent="center" sx={{ height: 1 }} spacing={3}>
@@ -142,7 +180,16 @@ export default function EnterEmail() {
                       fullWidth
                       name="password"
                       label="New Password"
-                      type="password"
+                      type={showPassword ? 'text' : 'password'}
+                      InputProps={{
+                        endAdornment: (
+                          <InputAdornment position="end">
+                            <IconButton onClick={() => setShowPassword(!showPassword)} edge="end">
+                              {showPassword ? '👁️' : '👁️'}
+                            </IconButton>
+                          </InputAdornment>
+                        ),
+                      }}
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       required
@@ -151,7 +198,16 @@ export default function EnterEmail() {
                       fullWidth
                       name="confirmPassword"
                       label="Confirm Password"
-                      type="password"
+                      type={showPassword ? 'text' : 'password'}
+                      InputProps={{
+                        endAdornment: (
+                          <InputAdornment position="end">
+                            <IconButton onClick={() => setShowPassword(!showPassword)} edge="end">
+                              {showPassword ? '👁️' : '👁️'}
+                            </IconButton>
+                          </InputAdornment>
+                        ),
+                      }}
                       value={confirmPassword}
                       onChange={(e) => setConfirmPassword(e.target.value)}
                       required
@@ -159,7 +215,7 @@ export default function EnterEmail() {
                   </Stack>
                 </DialogContent>
                 <DialogActions>
-                  <Button onClick={handleCloseDialog}>Hủy bỏ</Button>
+                  <Button onClick={handleCloseDialog}>Cancel</Button>
                   <LoadingButton
                     fullWidth
                     size="large"
