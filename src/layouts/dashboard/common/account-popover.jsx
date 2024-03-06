@@ -1,5 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+
 import PropTypes from 'prop-types';
 import Box from '@mui/material/Box';
 import Avatar from '@mui/material/Avatar';
@@ -10,10 +11,9 @@ import MenuItem from '@mui/material/MenuItem';
 import Typography from '@mui/material/Typography';
 import IconButton from '@mui/material/IconButton';
 
-import { account } from 'src/_mock/account';
+// import { account } from 'src/_mock/account';
 
 import { API_BASE_URL } from '../../../../config'; // Import your API_BASE_URL
-
 // ----------------------------------------------------------------------
 
 const MENU_OPTIONS = [
@@ -33,10 +33,17 @@ const MENU_OPTIONS = [
 
 // ----------------------------------------------------------------------
 
-export default function AccountPopover(props) {
+AccountPopover.propTypes = {
+  loggedIn: PropTypes.bool,
+  setLoggedIn: PropTypes.func,
+  token: PropTypes.string,
+  setToken: PropTypes.func,
+};
+
+export default function AccountPopover({ loggedIn, setLoggedIn, token, setToken }) {
   const [open, setOpen] = useState(null);
-  const { loggedIn, setLoggedIn, setToken } = props;
   const navigate = useNavigate();
+  const [account, setAccount] = useState({});
 
   const handleOpen = (event) => {
     setOpen(event.currentTarget);
@@ -47,17 +54,51 @@ export default function AccountPopover(props) {
   };
 
   const handleLogout = () => {
-    // Log out logic goes here
-    fetch(`${API_BASE_URL}/api/account/logout`, {
-      method: 'POST',
-    });
-    localStorage.removeItem('jwttoken'); // Remove token from localStorage on logout
-    sessionStorage.removeItem('email'); // Remove email from sessionStorage on logout
+    // Perform logout actions (clear local storage, reset state, etc.)
+    localStorage.removeItem('jwttoken');
+    sessionStorage.removeItem('email');
+    
+    // Update state to reflect logout status
     setLoggedIn(false);
     setToken('');
-    console.log('Logged out');
-    navigate('/login');
+
+    // Navigate to the login page
+    window.location.href = '/login'; // You can use react-router-dom's history for navigation as well
   };
+
+  
+
+  useEffect(() => {
+    setToken(localStorage.getItem('jwttoken'));
+    console.log(token);
+    const getAccountInfo = async () => {
+      try {
+        const response = await fetch(`${API_BASE_URL}/api/Account/accountInfo`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': `application/json`,
+            'Authorization': `Bearer ${token}`,
+          },
+        });
+    
+        if (response.ok) {
+          const data = await response.json();
+          setAccount({
+            displayName: data.name,
+            role: data.role === true ? 'Admin' : 'User',
+            email: data.email,
+          });
+        } else {
+          console.error('Error fetching account info:', response.statusText);
+          // You can handle the error here, or leave it empty
+        }
+      } catch (error) {
+        console.error('Error fetching account info:', error.message);
+        // You can handle the error here, or leave it empty
+      }
+    };
+    getAccountInfo();
+  }, [token, setToken]);
 
   return (
     <>
@@ -82,7 +123,7 @@ export default function AccountPopover(props) {
             border: (theme) => `solid 2px ${theme.palette.background.default}`,
           }}
         >
-          {account.displayName.charAt(0).toUpperCase()}
+          {account.displayName}
         </Avatar>
       </IconButton>
 
@@ -132,8 +173,3 @@ export default function AccountPopover(props) {
     </>
   );
 }
-AccountPopover.propTypes = {
-  loggedIn: PropTypes.bool.isRequired,
-  setLoggedIn: PropTypes.func.isRequired,
-  setToken: PropTypes.func.isRequired,
-};

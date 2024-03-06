@@ -4,26 +4,27 @@ import DashboardLayout from 'src/layouts/dashboard';
 import LoginView from 'src/sections/login/login-view';
 
 import { API_BASE_URL } from '../../config';
+import FirebaseImageUpload from 'src/utils/FirebaseImageUpload';
+
 
 export const IndexPage = lazy(() => import('src/pages/app'));
 export const BlogPage = lazy(() => import('src/pages/blog'));
 export const UserPage = lazy(() => import('src/pages/user'));
 export const LoginPage = lazy(() => import('src/pages/login'));
 export const ProductsPage = lazy(() => import('src/pages/products'));
-export const Page404 = lazy(() => import('src/pages/page-not-found'));
-
+export const Page404 = lazy(() => import('src/pages/page-not-found'))
 export const QuotationsPage = lazy(() => import('src/pages/quotations'));
-
 export const ForgetPage = lazy(() => import('src/pages/forget'));
-export const VerifyPage = lazy(() => import('src/pages/verify-otp'))
-
-
 // ----------------------------------------------------------------------
 
 export default function Router() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const updateAuthentication = (value) => {
+    setIsAuthenticated(value);
+  };
 
   useEffect(() => {
+    console.log('Checking authentication...');
     const checkAuthentication = async () => {
       try {
         const token = localStorage.getItem('jwttoken');
@@ -84,15 +85,11 @@ export default function Router() {
     },
     {
       path: 'login',
-      element: <LoginPage />
+      element: <LoginPage isAuthenticated={isAuthenticated} updateAuthentication={updateAuthentication} />
     },
     {
       path: 'forget',
       element: <ForgetPage />,
-    },
-    {
-      path: 'verify',
-      element: <VerifyPage/>,
     },
     {
       path: '404',
@@ -101,6 +98,10 @@ export default function Router() {
     {
       path: '*',
       element: <Navigate to="/404" replace />,
+    },
+    {
+      path: '/upload',
+      element: <FirebaseImageUpload/>,
     },
   ]);
 
