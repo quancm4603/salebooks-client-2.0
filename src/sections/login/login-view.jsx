@@ -26,8 +26,6 @@ export default function LoginView( { isAuthenticated, updateAuthentication } ) {
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
 
-  // useEffect(() => {
-    
     useEffect(() => {
       console.log(isAuthenticated);
       if (isAuthenticated) {
@@ -82,6 +80,7 @@ export default function LoginView( { isAuthenticated, updateAuthentication } ) {
 
     const email = e.target.email.value;
     const password = e.target.password.value;
+    
 
     try {
       const response = await fetch(`${API_BASE_URL}/api/account/login`, {
@@ -135,16 +134,15 @@ export default function LoginView( { isAuthenticated, updateAuthentication } ) {
           />
         </Stack>
 
-        <Stack direction="row" alignItems="center" justifyContent="flex-end" sx={{ my: 3 }}>
-          <Link variant="subtitle2" underline="hover">
-            Forgot password?
-          </Link>
-        </Stack>
-
         <LoadingButton fullWidth size="large" type="submit" variant="contained" color="inherit">
           Login
         </LoadingButton>
       </form>
+      <Stack direction="row" alignItems="center" justifyContent="flex-end" sx={{ my: 3 }}>
+        <Link onClick={handleForget} variant="subtitle2" underline="hover">
+          Forgot password
+        </Link>
+      </Stack>
     </>
   );
 
