@@ -140,6 +140,9 @@ export default function EnterEmail() {
                 onChange={handleEmailChange}
                 required
               />
+
+
+              
             </Stack>
             {checkingEmail && <LinearProgress color="secondary" fourColor variant="indeterminate" />} {/* Thay thế LoadingButton bằng LinearProgress */}
             <Button // Thay thế LoadingButton bằng Button để tạm thời vô hiệu hóa nút khi đang kiểm tra email
