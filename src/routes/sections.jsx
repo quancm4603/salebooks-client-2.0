@@ -17,8 +17,12 @@ export const Page404 = lazy(() => import('src/pages/page-not-found'));
 
 export default function Router() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const updateAuthentication = (value) => {
+    setIsAuthenticated(value);
+  };
 
   useEffect(() => {
+    console.log('Checking authentication...');
     const checkAuthentication = async () => {
       try {
         const token = localStorage.getItem('jwttoken');
@@ -78,7 +82,7 @@ export default function Router() {
     },
     {
       path: 'login',
-      element: <LoginPage />
+      element: <LoginPage isAuthenticated={isAuthenticated} updateAuthentication={updateAuthentication} />
     },
     {
       path: '404',

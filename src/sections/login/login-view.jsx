@@ -21,46 +21,60 @@ import { toast } from 'react-toastify';
 import Swal from 'sweetalert2';
 import { API_BASE_URL } from '../../../config';
 
-export default function LoginView() {
+export default function LoginView( { isAuthenticated, updateAuthentication } ) {
   const theme = useTheme();
   const navigate = useNavigate();
-
   const [showPassword, setShowPassword] = useState(false);
 
-  useEffect(() => {
-    console.log('Checking authentication...');
-    const checkAuthentication = async () => {
-      try {
-        const token = localStorage.getItem('jwttoken');
-
-        if (token) {
-          const response = await fetch(`${API_BASE_URL}/api/account/isLogin`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ token }),
-          });
-
-          if (response.ok) {
-            navigate('/'); // Navigate to home page if authenticated
-          } else {
-            localStorage.removeItem('jwttoken');
-            sessionStorage.removeItem('email');
-            navigate('/login');
-          }
-        } else {
-          localStorage.removeItem('jwttoken');
-          sessionStorage.removeItem('email');
-        }
-      } catch (error) {
-        console.error('Error checking authentication:', error);
-        localStorage.removeItem('jwttoken');
-        sessionStorage.removeItem('email');
+  // useEffect(() => {
+    
+    useEffect(() => {
+      console.log(isAuthenticated);
+      if (isAuthenticated) {
+        console.log('Already authenticated');
+        navigate('/'); // Redirect to home page if already authenticated
       }
-    };
+    }, [isAuthenticated, navigate]);
 
-    // Check authentication on component mount
-    checkAuthentication();
-  }, [navigate]);
+    // const checkAuthentication = async () => {
+    //   try {
+    //     const token = localStorage.getItem('jwttoken');
+
+    //     if (token) {
+    //       console.log('Checking authentication...');
+    //       const response = await fetch(`${API_BASE_URL}/api/account/isLogin`, {
+    //         method: 'POST',
+    //         headers: { 'Content-Type': 'application/json' },
+    //         body: JSON.stringify({ token }),
+    //       });
+
+    //       if (response.ok) {
+    //         console.log('Token OK:', localStorage.getItem('jwttoken'));
+    //         navigate('/'); // Navigate to home page if authenticated
+    //       } else {
+    //         localStorage.removeItem('jwttoken');
+    //         sessionStorage.removeItem('email');
+    //         console.log('Token no OK:', localStorage.getItem('jwttoken'));
+    //         navigate('/login');
+    //       }
+    //     } else {
+    //       localStorage.removeItem('jwttoken');
+    //       sessionStorage.removeItem('email');
+    //       console.log('Token no :', localStorage.getItem('jwttoken'));
+    //       navigate('/login');
+    //     }
+    //   } catch (error) {
+    //     console.error('Error checking authentication:', error);
+    //     console.log('Token no OKerrr:', localStorage.getItem('jwttoken'));
+    //     localStorage.removeItem('jwttoken');
+    //     sessionStorage.removeItem('email');
+    //     navigate('/login');
+    //   }
+    // };
+
+    // // Check authentication on component mount
+    // checkAuthentication();
+  // }, [isAuthenticated, navigate]);
 
   const handleLogin = async (e) => {
     console.log('Logging in...');
@@ -91,6 +105,8 @@ export default function LoginView() {
       localStorage.setItem('jwttoken', token);
       sessionStorage.setItem('email', email);
       console.log('Logged in');
+      isAuthenticated = true;
+      updateAuthentication(true);
       navigate('/'); // Navigate to home page
     } catch (error) {
       toast.error(`Login Failed: ${error.message}`);
@@ -160,45 +176,9 @@ export default function LoginView() {
         >
           <Typography variant="h4">Sign in to SaleBooks</Typography>
 
-          <Typography variant="body2" sx={{ mt: 2, mb: 5 }}>
-            Don’t have an account?
-            <Link variant="subtitle2" sx={{ ml: 0.5 }}>
-              Get started
-            </Link>
-          </Typography>
-
-          <Stack direction="row" spacing={2}>
-            <Button
-              fullWidth
-              size="large"
-              color="inherit"
-              variant="outlined"
-            >
-              <Iconify icon="eva:google-fill" color="#DF3E30" />
-            </Button>
-
-            <Button
-              fullWidth
-              size="large"
-              color="inherit"
-              variant="outlined"
-            >
-              <Iconify icon="eva:facebook-fill" color="#1877F2" />
-            </Button>
-
-            <Button
-              fullWidth
-              size="large"
-              color="inherit"
-              variant="outlined"
-            >
-              <Iconify icon="eva:twitter-fill" color="#1C9CEA" />
-            </Button>
-          </Stack>
-
           <Divider sx={{ my: 3 }}>
             <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-              OR
+              Enter your login details
             </Typography>
           </Divider>
 
@@ -208,3 +188,8 @@ export default function LoginView() {
     </Box>
   );
 }
+
+LoginView.propTypes = {
+  isAuthenticated: PropTypes.bool.isRequired,
+  updateAuthentication: PropTypes.func.isRequired,
+};

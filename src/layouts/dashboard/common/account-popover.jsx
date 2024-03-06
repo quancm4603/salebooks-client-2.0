@@ -1,6 +1,7 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import PropTypes from 'prop-types';
+import { useNavigate } from 'react-router-dom';
+
 import Box from '@mui/material/Box';
 import Avatar from '@mui/material/Avatar';
 import Divider from '@mui/material/Divider';
@@ -33,9 +34,15 @@ const MENU_OPTIONS = [
 
 // ----------------------------------------------------------------------
 
-export default function AccountPopover(props) {
+AccountPopover.propTypes = {
+  loggedIn: PropTypes.bool,
+  setLoggedIn: PropTypes.func,
+  token: PropTypes.string,
+  setToken: PropTypes.func,
+};
+
+export default function AccountPopover({ loggedIn, setLoggedIn, token, setToken }) {
   const [open, setOpen] = useState(null);
-  const { loggedIn, setLoggedIn, setToken } = props;
   const navigate = useNavigate();
 
   const handleOpen = (event) => {
@@ -47,16 +54,16 @@ export default function AccountPopover(props) {
   };
 
   const handleLogout = () => {
-    // Log out logic goes here
-    fetch(`${API_BASE_URL}/api/account/logout`, {
-      method: 'POST',
-    });
-    localStorage.removeItem('jwttoken'); // Remove token from localStorage on logout
-    sessionStorage.removeItem('email'); // Remove email from sessionStorage on logout
+    // Perform logout actions (clear local storage, reset state, etc.)
+    localStorage.removeItem('jwttoken');
+    sessionStorage.removeItem('email');
+    
+    // Update state to reflect logout status
     setLoggedIn(false);
     setToken('');
-    console.log('Logged out');
-    navigate('/login');
+
+    // Navigate to the login page
+    window.location.href = '/login'; // You can use react-router-dom's history for navigation as well
   };
 
   return (
@@ -132,8 +139,3 @@ export default function AccountPopover(props) {
     </>
   );
 }
-AccountPopover.propTypes = {
-  loggedIn: PropTypes.bool.isRequired,
-  setLoggedIn: PropTypes.func.isRequired,
-  setToken: PropTypes.func.isRequired,
-};
