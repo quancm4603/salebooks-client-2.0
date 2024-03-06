@@ -70,12 +70,13 @@ export default function AccountPopover({ loggedIn, setLoggedIn, token, setToken 
 
   useEffect(() => {
     setToken(localStorage.getItem('jwttoken'));
+    console.log(token);
     const getAccountInfo = async () => {
       try {
         const response = await fetch(`${API_BASE_URL}/api/Account/accountInfo`, {
           method: 'GET',
           headers: {
-            'Content-Type': 'application/json',
+            'Content-Type': `application/json`,
             'Authorization': `Bearer ${token}`,
           },
         });
