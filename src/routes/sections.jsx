@@ -2,14 +2,17 @@ import { lazy, Suspense, useEffect, useState } from 'react';
 import { Outlet, Navigate, useRoutes } from 'react-router-dom';
 import DashboardLayout from 'src/layouts/dashboard';
 import LoginView from 'src/sections/login/login-view';
+import FirebaseImageUpload from 'src/utils/FirebaseImageUpload';
+
 
 import { API_BASE_URL } from '../../config';
-import FirebaseImageUpload from 'src/utils/FirebaseImageUpload';
 
 
 export const IndexPage = lazy(() => import('src/pages/app'));
 export const BlogPage = lazy(() => import('src/pages/blog'));
 export const UserPage = lazy(() => import('src/pages/user'));
+export const CustomerPage = lazy(() => import('src/pages/customer'));
+
 export const LoginPage = lazy(() => import('src/pages/login'));
 export const ProductsPage = lazy(() => import('src/pages/products'));
 export const Page404 = lazy(() => import('src/pages/page-not-found'))
@@ -78,6 +81,7 @@ export default function Router() {
       children: [
         { element: <IndexPage />, index: true },
         { path: 'user', element: <UserPage /> },
+        { path: 'customer', element: <CustomerPage /> },
         { path: 'products', element: <ProductsPage /> },
         { path: 'blog', element: <BlogPage /> },
         { path: 'quotations', element: <QuotationsPage /> },
