@@ -36,7 +36,7 @@ function FirebaseImageUpload(){
     return (
         <>
             <input type="file" onChange={(e) => setImg(e.target.files[0])} />
-            <button onClick={handleClick}>Upload</button>
+            <button type="button" onClick={handleClick}>Upload</button>
             <br />
             {imgUrl.map(dataVal => (
                 <div key={dataVal}>
