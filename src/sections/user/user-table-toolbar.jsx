@@ -11,7 +11,7 @@ import Iconify from 'src/components/iconify';
 
 // ----------------------------------------------------------------------
 
-export default function UserTableToolbar({ numSelected, filterName, onFilterName }) {
+export default function UserTableToolbar({ numSelected, filterName, onFilterName, onExportToExcel}) {
   return (
     <Toolbar
       sx={{
@@ -45,6 +45,14 @@ export default function UserTableToolbar({ numSelected, filterName, onFilterName
         />
       )}
 
+{numSelected > 0 && (
+        <Tooltip title="Export to Excel">
+          <IconButton onClick={onExportToExcel}>
+            <Iconify icon="eva-save-fill" />
+          </IconButton>
+        </Tooltip>
+      )}
+
       
     </Toolbar>
   );
@@ -54,4 +62,5 @@ UserTableToolbar.propTypes = {
   numSelected: PropTypes.number,
   filterName: PropTypes.string,
   onFilterName: PropTypes.func,
+  onExportToExcel: PropTypes.func,
 };
