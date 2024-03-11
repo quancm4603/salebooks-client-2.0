@@ -1,4 +1,5 @@
 import axios from 'axios';
+import * as XLSX from 'xlsx';
 import Swal from 'sweetalert2';
 import { useNavigate } from 'react-router-dom';
 import React, { useState, useEffect, useCallback } from 'react';
@@ -27,7 +28,6 @@ import {
 import Iconify from 'src/components/iconify';
 import Scrollbar from 'src/components/scrollbar';
 
-import * as XLSX from 'xlsx';
 import TableNoData from '../table-no-data';
 import SellerTableRow from '../user-table-row';
 import TableEmptyRows from '../table-empty-rows';
@@ -563,14 +563,8 @@ function SellersPage() {
           </ModalContent>
         </Modal>
 
-        <Button
-          variant="contained"
-          color="primary"
-          startIcon={<Iconify icon="eva:file-excel-fill" />}
-          onClick={handleExportToExcel}
-        >
-          Export Selected to Excel
-        </Button>
+        
+
 
       </Stack>
 
@@ -581,6 +575,7 @@ function SellersPage() {
           numSelected={selected.length}
           filterName={filterName}
           onFilterName={handleFilterByName}
+          onExportToExcel = {handleExportToExcel}
         />
 
         <Scrollbar>
