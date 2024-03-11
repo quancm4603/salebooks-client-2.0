@@ -106,7 +106,7 @@ export default function QuotationsView() {
     const fetchProducts = async () => {
       try {
         const token = localStorage.getItem('jwttoken');
-        const response = await fetch(`${API_BASE_URL}/api/Products`, {
+        const response = await fetch(`${API_BASE_URL}/api/Product`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -198,11 +198,7 @@ export default function QuotationsView() {
   const fetchQuotations = async () => {
     try {
       const token = localStorage.getItem('jwttoken');
-      const response = await fetch(`${API_BASE_URL}/api/Quotation`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const response = await fetch(`${API_BASE_URL}/api/Quotation`);
       if (response.ok) {
         const data = await response.json();
         console.log(data);
@@ -439,7 +435,7 @@ export default function QuotationsView() {
           numSelected={selected.length}
           filterName={filterName}
           onFilterName={handleFilterByName}
-          onExportToExcel={handleExportToExcel}  // Pass the function to handle export
+          onExportToExcel={handleExportToExcel}
         />
 
         <Scrollbar>
@@ -596,10 +592,10 @@ export default function QuotationsView() {
         <DialogActions>
           <div style={{ flexGrow: 1, marginLeft: '16px' }}>
             <Typography variant="body1">
-              {`Total without tax: ${calculateTotal()}VNĐ`}
+              {`Total without tax: $${calculateTotal()}`}
             </Typography>
             <Typography variant="body1">
-              {`Total with tax: ${calculateTotalWithTax()}VNĐ`}
+              {`Total with tax: $${calculateTotalWithTax()}`}
             </Typography>
           </div>
           <Button onClick={handleCloseCreateDialog} variant="outlined" color="primary">

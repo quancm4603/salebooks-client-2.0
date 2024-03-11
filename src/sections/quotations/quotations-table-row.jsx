@@ -28,6 +28,7 @@ import Label from 'src/components/label';
 import Iconify from 'src/components/iconify';
 
 import Paper from '@mui/material/Paper';
+import CircularProgress from '@mui/material/CircularProgress';
 
 import { API_BASE_URL } from '../../../config';
 
@@ -48,8 +49,11 @@ export default function QuotationTableRow({
 
   const navigate = useNavigate();
 
+  const [openSendDialog, setOpenSendDialog] = useState(false);
   const [openCancelDialog, setOpenCancelDialog] = useState(false);
   const [openConfirmDialog, setOpenConfirmDialog] = useState(false);
+
+  const [loading, setLoading] = useState(false);
 
   const [currentQuotationDetails, setCurrentQuotationDetails] = useState(null);
   const [openDetailDialog, setOpenDetailDialog] = useState(false);
@@ -63,6 +67,16 @@ export default function QuotationTableRow({
 
   const handleCloseDetailDialog = () => {
     setOpenDetailDialog(false);
+    handleCloseMenu();
+  };
+
+  // Send
+  const handleOpenSendDialog = () => {
+    setOpenSendDialog(true);
+  };
+
+  const handleCloseSendDialog = () => {
+    setOpenSendDialog(false);
     handleCloseMenu();
   };
 
@@ -186,6 +200,46 @@ export default function QuotationTableRow({
     } catch (error) {
       console.error('Error fetching quotation details:', error);
       throw error; // Rethrow the error to handle it in the calling function
+    }
+  };
+
+  const handleSendQuotation = async (num) => {
+    try {
+      setLoading(true);
+      const token = localStorage.getItem('jwttoken');
+      const response = await fetch(`${API_BASE_URL}/api/Quotation/${num}/SendQuotationEmail`, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          quotationId: num,
+        }),
+      });
+
+      if (response.ok) {
+        console.log('Quotation email sent successfully.');
+        setLoading(false);
+        handleCloseSendDialog();
+        handleCloseMenu();
+        Swal.fire({
+          title: 'Email Sent!',
+          text: 'Quotation email sent successfully!',
+          icon: 'success',
+        });
+      } else {
+        console.error('Failed to send quotation email.');
+        handleCloseSendDialog();
+        handleCloseMenu();
+        Swal.fire({
+          icon: 'error',
+          title: 'Failed!',
+          text: 'Failed to send quotation email!',
+        });
+      }
+    } catch (error) {
+      console.error('Error sending quotation email:', error);
     }
   };
 
@@ -330,11 +384,36 @@ export default function QuotationTableRow({
         </Dialog>
 
         {status === 'Quotation' && (
-          <MenuItem onClick={handleCloseMenu} sx={{ color: 'primary.main' }}>
+          <MenuItem onClick={handleOpenSendDialog} sx={{ color: 'primary.main' }}>
             <Iconify icon="eva-navigation-2-fill" sx={{ mr: 2 }} />
             Send
           </MenuItem>
         )}
+
+        <Dialog open={openSendDialog} onClose={handleCloseSendDialog}>
+          <DialogTitle>Send</DialogTitle>
+          <DialogContent>Are you sure you want to send this quotation?</DialogContent>
+          <DialogActions>
+            <Button onClick={handleCloseSendDialog} variant="outlined" color="primary">
+              Leave
+            </Button>
+            <Button onClick={() => handleSendQuotation(id)} variant="contained" color="primary" disabled={loading}>
+              {loading && (
+                <CircularProgress
+                  size={24}
+                  sx={{
+                    position: 'absolute',
+                    left: '50%',
+                    top: '50%',
+                    marginLeft: '-12px',
+                    marginTop: '-12px',
+                  }}
+                />
+              )}
+              Send
+            </Button>
+          </DialogActions>
+        </Dialog>
 
         {status === 'Quotation' && (
           <MenuItem onClick={handleOpenCancelDialog} sx={{ color: 'error.main' }}>
