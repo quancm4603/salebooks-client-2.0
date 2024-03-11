@@ -391,7 +391,7 @@ export default function QuotationTableRow({
         )}
 
         <Dialog open={openSendDialog} onClose={handleCloseSendDialog}>
-          <DialogTitle>Cancel</DialogTitle>
+          <DialogTitle>Send</DialogTitle>
           <DialogContent>Are you sure you want to send this quotation?</DialogContent>
           <DialogActions>
             <Button onClick={handleCloseSendDialog} variant="outlined" color="primary">

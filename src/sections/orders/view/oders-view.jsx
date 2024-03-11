@@ -106,7 +106,7 @@ export default function QuotationsView() {
         const fetchProducts = async () => {
             try {
                 const token = localStorage.getItem('jwttoken');
-                const response = await fetch(`${API_BASE_URL}/api/Product/GetProducts`, {
+                const response = await fetch(`${API_BASE_URL}/api/Product`, {
                     headers: {
                         Authorization: `Bearer ${token}`,
                     },
