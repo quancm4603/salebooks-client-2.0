@@ -106,7 +106,7 @@ export default function QuotationsView() {
         const fetchProducts = async () => {
             try {
                 const token = localStorage.getItem('jwttoken');
-                const response = await fetch(`${API_BASE_URL}/api/Product/GetProducts`, {
+                const response = await fetch(`${API_BASE_URL}/api/Product`, {
                     headers: {
                         Authorization: `Bearer ${token}`,
                     },
@@ -270,21 +270,21 @@ export default function QuotationsView() {
                 setOpenCreateDialog(false);
                 Swal.fire({
                     title: "Added!",
-                    text: "Addquotation successfully!",
+                    text: "Add Orders successfully!",
                     icon: "success"
                 });
             } else {
                 const errorText = await response.text();
-                console.error('Failed to create quotation:', errorText);
+                console.error('Failed to create Orders:', errorText);
                 setOpenCreateDialog(false);
                 Swal.fire({
                     icon: "error",
                     title: "Oops...",
-                    text: "Failed to create quotation!",
+                    text: "Failed to create Orders!",
                 });
             }
         } catch (error) {
-            console.error('Error creating quotation:', error);
+            console.error('Error creating Orders:', error);
         }
 
         setNewQuotation({
@@ -392,14 +392,14 @@ export default function QuotationsView() {
 
                     allData.push(quotationData, ...detailsData);
                 } else {
-                    console.error(`Failed to fetch quotation details for ID ${quotationId}`);
+                    console.error(`Failed to fetch Orders details for ID ${quotationId}`);
                 }
             })
         );
 
         const ws = XLSX.utils.json_to_sheet(allData);
-        XLSX.utils.book_append_sheet(wb, ws, 'Quotations_With_Details');
-        XLSX.writeFile(wb, 'selected_quotations_with_details.xlsx');
+        XLSX.utils.book_append_sheet(wb, ws, 'Orders_With_Details');
+        XLSX.writeFile(wb, 'selected_quotationsOrders_with_details.xlsx');
     };
 
     const fetchQuotationDetails = async (quotationId) => {
@@ -416,9 +416,9 @@ export default function QuotationsView() {
                 return data;
             }
 
-            console.error(`Failed to fetch quotation details for ID ${quotationId}`);
+            console.error(`Failed to fetch Orders details for ID ${quotationId}`);
         } catch (error) {
-            console.error('Error fetching quotation details:', error);
+            console.error('Error fetching Orders details:', error);
         }
 
         return [];

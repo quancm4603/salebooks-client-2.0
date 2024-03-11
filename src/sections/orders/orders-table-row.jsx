@@ -181,10 +181,10 @@ export default function QuotationTableRow({
         const totalAmount = data.reduce((acc, detail) => acc + detail.subTotal, 0);
         setTotal(totalAmount);
       } else {
-        console.error('Failed to fetch quotation details');
+        console.error('Failed to fetch Orders details');
       }
     } catch (error) {
-      console.error('Error fetching quotation details:', error);
+      console.error('Error fetching Orders details:', error);
       throw error; // Rethrow the error to handle it in the calling function
     }
   };
