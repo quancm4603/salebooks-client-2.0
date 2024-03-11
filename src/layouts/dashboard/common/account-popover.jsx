@@ -69,14 +69,14 @@ export default function AccountPopover({ loggedIn, setLoggedIn, token, setToken 
   
 
   useEffect(() => {
-    console.log('token account popo :', token);
-    setToken(token);
+    console.log('token account popo :', localStorage.getItem('jwttoken'));
+    setToken(localStorage.getItem('jwttoken'));
 
     const getAccountInfo = async () => {
       try {
         const response = await fetch(`${API_BASE_URL}/api/Account/accountInfo`, {
           headers: {
-            Accept: 'application/json',
+            Accept : 'application/json',
             Authorization: `Bearer ${token}`,
           },
         });
