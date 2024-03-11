@@ -69,34 +69,33 @@ export default function AccountPopover({ loggedIn, setLoggedIn, token, setToken 
   
 
   useEffect(() => {
-    setToken(localStorage.getItem('jwttoken'));
-    console.log(token);
+    console.log('token account popo :', token);
+    setToken(token);
+
     const getAccountInfo = async () => {
       try {
         const response = await fetch(`${API_BASE_URL}/api/Account/accountInfo`, {
-          method: 'GET',
           headers: {
-            'Content-Type': `application/json`,
-            'Authorization': `Bearer ${token}`,
+            Accept: 'application/json',
+            Authorization: `Bearer ${token}`,
           },
         });
-    
+
         if (response.ok) {
           const data = await response.json();
           setAccount({
             displayName: data.name,
-            role: data.role === true ? 'Admin' : 'User',
+            role: data.role ? 'Admin' : 'User',
             email: data.email,
           });
         } else {
           console.error('Error fetching account info:', response.statusText);
-          // You can handle the error here, or leave it empty
         }
       } catch (error) {
         console.error('Error fetching account info:', error.message);
-        // You can handle the error here, or leave it empty
       }
     };
+
     getAccountInfo();
   }, [token, setToken]);
 
