@@ -66,20 +66,20 @@ export default function ProductDetailDialog({ open, onClose, productId }) {
                 key={index}
                 src={
                   imageUrl ||
-                  'https://lh3.googleusercontent.com/proxy/mnGIT1THSnkzcb5kn25Vmc8TnR2YC4L0QTaFROlk7ABwgCmhILKaURhEP0l2nB9FAk0lKqioy-SPnlqYJ9jR4-GISbz5XO2DZNKYQsNklw'
+                  'https://scontent.fsgn2-7.fna.fbcdn.net/v/t1.15752-9/430854051_3569145256631762_695375072275222205_n.jpg?_nc_cat=108&ccb=1-7&_nc_sid=5f2048&_nc_ohc=6riD3q6WO9gAX-mMJM_&_nc_oc=AQlgwn7LYnzIVqUkmhm9YSdQVgDjsvygGRfa4Q6mzMlduPLd5sv0ws7qMP06XzvApQc&_nc_ht=scontent.fsgn2-7.fna&oh=03_AdRKs53PeBPhYq_hGkGgyjgexb2mMaDI4LEPV2hzJ4MlZA&oe=66171F1F'
                 } // Provide a placeholder URL here
                 alt=""
                 style={{ width: 200, height: 200, marginRight: 10 }}
                 onError={(e) => {
                   e.target.onerror = null; // Prevent infinite loop
                   e.target.src =
-                    'https://lh3.googleusercontent.com/proxy/mnGIT1THSnkzcb5kn25Vmc8TnR2YC4L0QTaFROlk7ABwgCmhILKaURhEP0l2nB9FAk0lKqioy-SPnlqYJ9jR4-GISbz5XO2DZNKYQsNklw'; // Fallback to placeholder if image fails to load
+                    'https://scontent.fsgn2-7.fna.fbcdn.net/v/t1.15752-9/430854051_3569145256631762_695375072275222205_n.jpg?_nc_cat=108&ccb=1-7&_nc_sid=5f2048&_nc_ohc=6riD3q6WO9gAX-mMJM_&_nc_oc=AQlgwn7LYnzIVqUkmhm9YSdQVgDjsvygGRfa4Q6mzMlduPLd5sv0ws7qMP06XzvApQc&_nc_ht=scontent.fsgn2-7.fna&oh=03_AdRKs53PeBPhYq_hGkGgyjgexb2mMaDI4LEPV2hzJ4MlZA&oe=66171F1F'; // Fallback to placeholder if image fails to load
                 }}
               />
             ))}
             {(!productDetails || productDetails.imageUrls.length === 0) && (
               <img
-                src="https://lh3.googleusercontent.com/proxy/mnGIT1THSnkzcb5kn25Vmc8TnR2YC4L0QTaFROlk7ABwgCmhILKaURhEP0l2nB9FAk0lKqioy-SPnlqYJ9jR4-GISbz5XO2DZNKYQsNklw" // Placeholder for no images
+                src="https://scontent.fsgn2-7.fna.fbcdn.net/v/t1.15752-9/430854051_3569145256631762_695375072275222205_n.jpg?_nc_cat=108&ccb=1-7&_nc_sid=5f2048&_nc_ohc=6riD3q6WO9gAX-mMJM_&_nc_oc=AQlgwn7LYnzIVqUkmhm9YSdQVgDjsvygGRfa4Q6mzMlduPLd5sv0ws7qMP06XzvApQc&_nc_ht=scontent.fsgn2-7.fna&oh=03_AdRKs53PeBPhYq_hGkGgyjgexb2mMaDI4LEPV2hzJ4MlZA&oe=66171F1F" // Placeholder for no images
                 alt=""
                 style={{ width: 200, height: 200, marginRight: 10 }}
               />

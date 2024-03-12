@@ -56,7 +56,7 @@ export default function ProductTableToolbar({
       {numSelected > 0 ? (
         <Tooltip title="Export to excel">
           <IconButton onClick={onExportToExcel} disabled={loading}>
-            <Iconify icon="mdi:table-export" />
+            <Iconify icon="eva-save-fill" />
           </IconButton>
         </Tooltip>
       ) : (
