@@ -34,8 +34,7 @@ export default function AddProductDialog({ open, onClose, onAddProduct }) {
   const [categories, setCategories] = useState([]);
   const [newCategory, setNewCategory] = useState('');
   const [showValidationPopup, setShowValidationPopup] = useState(false);
-  const [loading, setLoading] = useState(false); // State for controlling the visibility of progress indicator
-
+  const [loading, setLoading] = useState(false);
   const fetchCategories = async () => {
     try {
       const token = localStorage.getItem('jwttoken');
@@ -77,7 +76,16 @@ export default function AddProductDialog({ open, onClose, onAddProduct }) {
   };
 
   const handleAddProduct = async () => {
-    if (!product.name || !product.type || !product.price || !product.categoryName || !product.tax) {
+    const taxRegex = /^\d+(\.\d{1,2})?$/;
+
+    if (
+      !product.name ||
+      !product.type ||
+      !product.price ||
+      !product.categoryName ||
+      !product.tax ||
+      !taxRegex.test(product.tax)
+    ) {
       setShowValidationPopup(true);
       return;
     }
@@ -207,7 +215,11 @@ export default function AddProductDialog({ open, onClose, onAddProduct }) {
             fullWidth
             name="price"
             value={product.price}
-            onChange={handleChange}
+            onChange={(e) => {
+              const input = e.target.value;
+              const sanitizedInput = input.replace(/\D/g, '');
+              handleChange({ target: { name: 'price', value: sanitizedInput } });
+            }}
           />
           <TextField
             margin="normal"
@@ -215,7 +227,15 @@ export default function AddProductDialog({ open, onClose, onAddProduct }) {
             fullWidth
             name="tax"
             value={product.tax}
-            onChange={handleChange}
+            onChange={(e) => {
+              let input = e.target.value;
+              input = input.replace(/[^\d.]/g, '');
+              const parts = input.split('.');
+              if (parts.length > 1) {
+                input = `${parts[0]}.${parts[1].slice(0, 2)}`;
+              }
+              handleChange({ target: { name: 'tax', value: input } });
+            }}
           />
           <Button component="label" variant="contained">
             Upload Images

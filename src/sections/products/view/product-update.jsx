@@ -30,6 +30,7 @@ export default function EditProductDialog({
   const [loading, setLoading] = useState(false);
   const [newCategory, setNewCategory] = useState('');
   const [categories, setCategories] = useState([]);
+  const [showValidationPopup, setShowValidationPopup] = useState(false);
 
   useEffect(() => {
     fetchCategories();
@@ -118,6 +119,18 @@ export default function EditProductDialog({
   };
 
   const handleUpdateProduct = async () => {
+    const taxRegex = /^\d+(\.\d{1,2})?$/;
+
+    if (
+      !product.name ||
+      !product.type ||
+      !product.price ||
+      !product.categoryName ||
+      !taxRegex.test(product.tax)
+    ) {
+      setShowValidationPopup(true);
+      return;
+    }
     setLoading(true);
     await new Promise((resolve) => setTimeout(resolve, 500));
     try {
@@ -156,135 +169,161 @@ export default function EditProductDialog({
   };
 
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="md">
-      <DialogTitle>Edit Product</DialogTitle>
-      <DialogContent dividers>
-        <TextField
-          autoFocus
-          margin="normal"
-          label="Name"
-          fullWidth
-          name="name"
-          value={product.name}
-          onChange={handleChange}
-        />
-        <Box marginTop={1}>
-          <Autocomplete
+    <>
+      <Dialog open={showValidationPopup} onClose={() => setShowValidationPopup(false)}>
+        <DialogTitle>Validation Error</DialogTitle>
+        <DialogContent>
+          <p>Please fill in all required * fields.</p>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setShowValidationPopup(false)} color="primary">
+            OK
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      <Dialog open={open} onClose={onClose} maxWidth="md">
+        <DialogTitle>Edit Product</DialogTitle>
+        <DialogContent dividers>
+          <TextField
+            autoFocus
+            margin="normal"
+            label="Name"
             fullWidth
-            options={['Consumable', 'Service']}
-            renderInput={(params) => <TextField {...params} label="Type" />}
-            value={product.type}
-            onChange={(event, value) => setProduct({ ...product, type: value })}
+            name="name"
+            value={product.name}
+            onChange={handleChange}
           />
-        </Box>
-        <Box marginTop={2}>
-          <Autocomplete
+          <Box marginTop={1}>
+            <Autocomplete
+              fullWidth
+              options={['Consumable', 'Service']}
+              renderInput={(params) => <TextField {...params} label="Type" />}
+              value={product.type}
+              onChange={(event, value) => setProduct({ ...product, type: value })}
+            />
+          </Box>
+          <Box marginTop={2}>
+            <Autocomplete
+              fullWidth
+              options={categories.map((category) => category.name)}
+              getOptionLabel={(option) => option}
+              value={product.categoryName}
+              onChange={(event, value) => setProduct({ ...product, categoryName: value })}
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  label="Category *"
+                  InputProps={{
+                    ...params.InputProps,
+                    endAdornment: (
+                      <>
+                        {newCategory &&
+                          !categories.some((category) => category.name === newCategory) && (
+                            <IconButton onClick={handleNewCategory} edge="end" size="small">
+                              <Iconify icon="bi:plus" />
+                            </IconButton>
+                          )}
+                        {params.InputProps.endAdornment}
+                      </>
+                    ),
+                  }}
+                />
+              )}
+              onInputChange={(event, value) => setNewCategory(value)}
+            />
+          </Box>
+          <TextField
+            margin="normal"
+            label="Price *"
             fullWidth
-            options={categories.map((category) => category.name)}
-            getOptionLabel={(option) => option}
-            value={product.categoryName}
-            onChange={(event, value) => setProduct({ ...product, categoryName: value })}
-            renderInput={(params) => (
-              <TextField
-                {...params}
-                label="Category *"
-                InputProps={{
-                  ...params.InputProps,
-                  endAdornment: (
-                    <>
-                      {newCategory &&
-                        !categories.some((category) => category.name === newCategory) && (
-                          <IconButton onClick={handleNewCategory} edge="end" size="small">
-                            <Iconify icon="bi:plus" />
-                          </IconButton>
-                        )}
-                      {params.InputProps.endAdornment}
-                    </>
-                  ),
+            name="price"
+            value={product.price}
+            onChange={(e) => {
+              const input = e.target.value;
+              const sanitizedInput = input.replace(/\D/g, '');
+              handleChange({ target: { name: 'price', value: sanitizedInput } });
+            }}
+          />
+          <TextField
+            margin="normal"
+            label="Tax *"
+            fullWidth
+            name="tax"
+            value={product.tax}
+            onChange={(e) => {
+              let input = e.target.value;
+              input = input.replace(/[^\d.]/g, '');
+              const parts = input.split('.');
+              if (parts.length > 1) {
+                input = `${parts[0]}.${parts[1].slice(0, 2)}`;
+              }
+              handleChange({ target: { name: 'tax', value: input } });
+            }}
+          />
+          <Button component="label" variant="contained">
+            Upload Images
+            <input
+              type="file"
+              accept="image/*"
+              multiple
+              style={{ display: 'none' }}
+              onChange={handleFileChange}
+            />
+          </Button>
+          <Box display="flex" flexWrap="wrap">
+            {product.imageUrls.map((url, index) => (
+              <Box key={index} sx={{ position: 'relative', m: 1 }}>
+                <Avatar alt={`Product ${index + 1}`} src={url} sx={{ width: 100, height: 100 }} />
+                <IconButton
+                  onClick={() => removeImage(index)}
+                  size="small"
+                  sx={{ position: 'absolute', top: 0, right: 0, bgcolor: 'background.paper' }}
+                >
+                  <Iconify icon="bi:trash" />
+                </IconButton>
+              </Box>
+            ))}
+          </Box>
+          <TextField
+            margin="normal"
+            label="Note"
+            fullWidth
+            name="note"
+            multiline
+            rows={3}
+            value={product.note}
+            onChange={handleChange}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button
+            onClick={handleUpdateProduct}
+            variant="contained"
+            color="primary"
+            disabled={loading}
+            sx={{ position: 'relative' }}
+          >
+            {loading && (
+              <CircularProgress
+                size={24}
+                sx={{
+                  position: 'absolute',
+                  left: '50%',
+                  top: '50%',
+                  marginLeft: '-12px',
+                  marginTop: '-12px',
                 }}
               />
             )}
-            onInputChange={(event, value) => setNewCategory(value)}
-          />
-        </Box>
-        <TextField
-          margin="normal"
-          label="Price"
-          fullWidth
-          name="price"
-          value={product.price}
-          onChange={handleChange}
-        />
-        <TextField
-          margin="normal"
-          label="Tax"
-          fullWidth
-          name="tax"
-          value={product.tax}
-          onChange={handleChange}
-        />
-        <Button component="label" variant="contained">
-          Upload Images
-          <input
-            type="file"
-            accept="image/*"
-            multiple
-            style={{ display: 'none' }}
-            onChange={handleFileChange}
-          />
-        </Button>
-        <Box display="flex" flexWrap="wrap">
-          {product.imageUrls.map((url, index) => (
-            <Box key={index} sx={{ position: 'relative', m: 1 }}>
-              <Avatar alt={`Product ${index + 1}`} src={url} sx={{ width: 100, height: 100 }} />
-              <IconButton
-                onClick={() => removeImage(index)}
-                size="small"
-                sx={{ position: 'absolute', top: 0, right: 0, bgcolor: 'background.paper' }}
-              >
-                <Iconify icon="bi:trash" />
-              </IconButton>
-            </Box>
-          ))}
-        </Box>
-        <TextField
-          margin="normal"
-          label="Note"
-          fullWidth
-          name="note"
-          multiline
-          rows={3}
-          value={product.note}
-          onChange={handleChange}
-        />
-      </DialogContent>
-      <DialogActions>
-        <Button
-          onClick={handleUpdateProduct}
-          variant="contained"
-          color="primary"
-          disabled={loading}
-          sx={{ position: 'relative' }}
-        >
-          {loading && (
-            <CircularProgress
-              size={24}
-              sx={{
-                position: 'absolute',
-                left: '50%',
-                top: '50%',
-                marginLeft: '-12px',
-                marginTop: '-12px',
-              }}
-            />
-          )}
-          Save Changes
-        </Button>
-        <Button onClick={onClose} variant="outlined" color="primary">
-          Cancel
-        </Button>
-      </DialogActions>
-    </Dialog>
+            Save Changes
+          </Button>
+          <Button onClick={onClose} variant="outlined" color="primary">
+            Cancel
+          </Button>
+        </DialogActions>
+      </Dialog>
+    </>
   );
 }
 
