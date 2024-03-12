@@ -274,18 +274,20 @@ export default function QuotationTableRow({
         <TableCell>
           {(() => {
             let labelColor = 'primary';
+            let displayStatus = status;
 
             if (status === 'Cancelled') {
               labelColor = 'error';
-            } else if (status === 'To Invoice') {
-              labelColor = 'warning';
-            } else if (status === 'Fully Invoice') {
+            } else if (status === 'To Invoice' || status === 'Fully Invoice') {
               labelColor = 'success';
+              displayStatus = 'order';
+            } else {
+              labelColor = 'primary';
             }
 
             return (
               <Label color={labelColor}>
-                {status}
+                {displayStatus}
               </Label>
             );
           })()}
