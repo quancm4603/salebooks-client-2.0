@@ -13,15 +13,44 @@ function CustomerOrderHistory({ customerId }) {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
+        // const fetchOrderHistory = async () => {
+        //     try {
+        //         const response = await axios.get(`https://localhost:7196/api/Customer/${customerId}/quotations`);
+        //         setOrderHistory(response.data);
+        //         setLoading(false);
+        //     } catch (error) {
+        //         console.error('Error fetching order history:', error);
+        //     }
+        // };
+
         const fetchOrderHistory = async () => {
             try {
-                const response = await axios.get(`https://localhost:7196/api/Customer/${customerId}/quotations`);
+              const token = localStorage.getItem('jwttoken');
+          
+              // Kiểm tra xem có mã token hay không
+              if (!token) {
+                throw new Error('Không tìm thấy mã token');
+              }
+          
+              // Gửi yêu cầu lấy lịch sử đơn hàng của khách hàng bằng axios
+              const response = await axios.get(`https://localhost:7196/api/Customer/${customerId}/quotations`, {
+                headers: {
+                  Authorization: `Bearer ${token}`,
+                },
+              });
+          
+              // Kiểm tra xem yêu cầu có thành công hay không
+              if (response.status === 200) {
                 setOrderHistory(response.data);
                 setLoading(false);
+              } else {
+                console.error('Failed to fetch order history');
+              }
             } catch (error) {
-                console.error('Error fetching order history:', error);
+              console.error('Error fetching order history:', error.message);
             }
-        };
+          };
+          
 
         fetchOrderHistory();
     }, [customerId]);
