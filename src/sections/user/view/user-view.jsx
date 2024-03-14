@@ -20,8 +20,10 @@ import {
   TextField,
   Typography,
   InputLabel,
+  IconButton,
   FormControl,
   TableContainer,
+  InputAdornment,
   TablePagination,
 } from '@mui/material';
 
@@ -36,9 +38,6 @@ import { API_BASE_URL } from '../../../../config';
 import SellerTableToolbar from '../user-table-toolbar';
 import { emptyRows, applyFilter, getComparator } from '../utils';
 
-
-
-
 const ModalContent = styled('div')(({ theme }) => ({
   position: 'absolute',
   top: '50%',
@@ -50,7 +49,6 @@ const ModalContent = styled('div')(({ theme }) => ({
   p: 4,
   outline: 'none',
 }));
-
 function SellersPage() {
   const [page, setPage] = useState(0);
   const [order, setOrder] = useState('asc');
@@ -60,9 +58,21 @@ function SellersPage() {
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [sellers, setSellers] = useState([]);  // Use sellers state
   const navigate = useNavigate();
-
   const [openAddSellerModal, setOpenAddSellerModal] = useState(false);
   const [showErrorSnackbar, setShowErrorSnackbar] = useState(false);
+
+  // Trong component SellersPage
+  const [showAddSellerPassword, setShowAddSellerPassword] = useState(false);
+  const [showEditSellerPassword, setShowEditSellerPassword] = useState(false);
+
+  // Trong component SellersPage
+  const handleToggleAddSellerPasswordVisibility = () => {
+    setShowAddSellerPassword(!showAddSellerPassword);
+  };
+
+  const handleToggleEditSellerPasswordVisibility = () => {
+    setShowEditSellerPassword(!showEditSellerPassword);
+  };
 
 
 
@@ -75,11 +85,9 @@ function SellersPage() {
     password: '',
     phoneNumber: '',
   });
-
   const handleOpenEditSellerModal = (id) => {
     // Lấy thông tin seller cần chỉnh sửa từ danh sách sellers
     const sellerToEdit = sellers.find((seller) => seller.id === id);
-
     // Mở dialog và set thông tin seller vào form
     setOpenEditSellerModal(true);
     setEditSellerFormData({
@@ -91,7 +99,6 @@ function SellersPage() {
       phoneNumber: sellerToEdit.phoneNumber,
     });
   };
-
   const handleCloseEditSellerModal = () => {
     setOpenEditSellerModal(false);
     // Reset form data when the modal is closed
@@ -104,7 +111,6 @@ function SellersPage() {
       phoneNumber: '',
     });
   };
-
   const handleEditSellerFormChange = (event) => {
     const { name, value, type, checked } = event.target;
     setEditSellerFormData((prevData) => ({
@@ -115,53 +121,83 @@ function SellersPage() {
 
   const handleEditSeller = async () => {
     try {
-        const token = localStorage.getItem('jwttoken');
+      const token = localStorage.getItem('jwttoken');
 
-        // Validation
-        if (!editSellerFormData.name || !editSellerFormData.email || !editSellerFormData.password || !editSellerFormData.phoneNumber) {
-            Swal.fire({
-                title: 'Validation Error',
-                text: 'Please fill in all required fields.',
-                icon: 'warning',
-            });
-            return;
-        }
-
-        const requestData = {
-            id: editSellerFormData.id,
-            name: editSellerFormData.name,
-            role: editSellerFormData.role,
-            email: editSellerFormData.email,
-            password: editSellerFormData.password,
-            phoneNumber: editSellerFormData.phoneNumber,
-        };
-
-        await axios.patch(`${API_BASE_URL}/api/Seller/UpdateSeller/${editSellerFormData.id}`, requestData, {
-            headers: {
-                Authorization: `Bearer ${token}`,
-            },
-        });
-
-        Swal.fire({
-            title: 'Success',
-            text: 'Seller updated successfully',
-            icon: 'success',
-        });
-
-        fetchSellers();  // This might be asynchronous
+      // Validation
+      if (!editSellerFormData.name) {
         handleCloseEditSellerModal();
+        Swal.fire({
+          title: 'Validation Error',
+          text: 'Please fill in the name field.',
+          icon: 'warning',
+        });
+        return;
+      }
+
+      if (!editSellerFormData.email || !/^\S+@\S+\.\S+$/.test(editSellerFormData.email)) {
+        handleCloseEditSellerModal();
+        Swal.fire({
+          title: 'Validation Error',
+          text: 'Please provide a valid email address.',
+          icon: 'warning',
+        });
+        return;
+      }
+
+      if (!editSellerFormData.phoneNumber || editSellerFormData.phoneNumber.length !== 10) {
+        handleCloseEditSellerModal();
+        Swal.fire({
+          title: 'Validation Error',
+          text: 'Please provide a valid 10-digit phone number.',
+          icon: 'warning',
+        });
+        return;
+      }
+
+      if (!editSellerFormData.password) {
+        handleCloseEditSellerModal();
+        Swal.fire({
+          title: 'Validation Error',
+          text: 'Please fill in the password field.',
+          icon: 'warning',
+        });
+        return;
+      }
+
+      const requestData = {
+        id: editSellerFormData.id,
+        name: editSellerFormData.name,
+        role: editSellerFormData.role,
+        email: editSellerFormData.email,
+        password: editSellerFormData.password,
+        phoneNumber: editSellerFormData.phoneNumber,
+      };
+
+      await axios.patch(`${API_BASE_URL}/api/Seller/UpdateSeller/${editSellerFormData.id}`, requestData, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      Swal.fire({
+        title: 'Success',
+        text: 'Seller updated successfully',
+        icon: 'success',
+      });
+
+      fetchSellers();  // This might be asynchronous
+      handleCloseEditSellerModal();
     } catch (err) {
-        console.error('Error updating seller:', err);
+      console.error('Error updating seller:', err);
 
-        Swal.fire({
-            title: 'Error',
-            text: 'An error occurred. Please try again.',
-            icon: 'error',
-        });
-        handleCloseEditSellerModal();
+      Swal.fire({
+        title: 'Error',
+        text: 'An error occurred. Please try again.',
+        icon: 'error',
+      });
+      handleCloseEditSellerModal();
     }
-};
-
+  };
 
 
 
@@ -175,7 +211,6 @@ function SellersPage() {
   const handleOpenAddSellerModal = () => {
     setOpenAddSellerModal(true);
   };
-
   const handleCloseAddSellerModal = () => {
     setOpenAddSellerModal(false);
     // Reset form data when the modal is closed
@@ -187,8 +222,6 @@ function SellersPage() {
       phoneNumber: '',
     });
   };
-
-
   const fetchSellers = useCallback(async () => {
     try {
       const token = localStorage.getItem('jwttoken');
@@ -197,15 +230,14 @@ function SellersPage() {
           Authorization: `Bearer ${token}`,
         },
       });
-
       if (response.ok) {
         const data = await response.json();
         // Chuyển đổi giá trị role từ true/false thành "User"/"Admin"
-      const updatedSellers = data.map((seller) => ({
-        ...seller,
-        role: seller.role ? "Admin" : "Seller",
-      }));
-      setSellers(updatedSellers);
+        const updatedSellers = data.map((seller) => ({
+          ...seller,
+          role: seller.role ? "Admin" : "Seller",
+        }));
+        setSellers(updatedSellers);
       } else {
         console.error('Failed to fetch Sellers');
         navigate('/login');
@@ -214,12 +246,9 @@ function SellersPage() {
       console.error('Error fetching Sellers:', error);
     }
   }, [navigate, setSellers]);
-
   useEffect(() => {
     fetchSellers();
   }, [fetchSellers]);
-
-
   const clearForm = () => {
     setAddSellerFormData({
       name: '',
@@ -229,9 +258,6 @@ function SellersPage() {
       phoneNumber: '',
     });
   };
-
-
-
   const handleSort = (event, id) => {
     const isAsc = orderBy === id && order === 'asc';
     if (id !== '') {
@@ -242,10 +268,7 @@ function SellersPage() {
   const handleUpdateUsers = (id) => {
     // Cập nhật danh sách người dùng bằng cách lọc ra những người dùng không có deletedUserId
     setSellers(sellers.filter((row) => row.id !== id));
-
   };
-
-
   const handleSelectAllClick = (event) => {
     if (event.target.checked) {
       const newSelecteds = sellers.map((n) => n.id);
@@ -254,7 +277,6 @@ function SellersPage() {
     }
     setSelected([]);
   };
-
   const handleClick = (event, id) => {
     const selectedIndex = selected.indexOf(id);
     let newSelected = [];
@@ -272,31 +294,24 @@ function SellersPage() {
     }
     setSelected(newSelected);
   };
-
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
   };
-
   const handleChangeRowsPerPage = (event) => {
     setPage(0);
     setRowsPerPage(parseInt(event.target.value, 10));
   };
-
   const handleFilterByName = (event) => {
     setPage(0);
     setFilterName(event.target.value);
   };
-
   const dataFiltered = applyFilter({
     inputData: sellers,
     comparator: getComparator(order, orderBy),
     filterName,
   });
-
   const notFound = !dataFiltered.length && !!filterName;
-
   const [showSuccessSnackbar, setShowSuccessSnackbar] = useState(false);
-
   // Function to handle changes in Add Seller form fields
   const handleAddSellerFormChange = (event) => {
     const { name, value, type, checked } = event.target;
@@ -305,22 +320,50 @@ function SellersPage() {
       [name]: type === 'checkbox' ? checked : value,
     }));
   };
-
   const handleAddSeller = async () => {
     try {
       const token = localStorage.getItem('jwttoken');
 
       // Validation
-      if (!addSellerFormData.name || !addSellerFormData.email || !addSellerFormData.password || !addSellerFormData.phoneNumber) {
+      if (!addSellerFormData.name) {
         handleCloseAddSellerModal();
         Swal.fire({
           title: 'Validation Error',
-          text: 'Please fill in all required fields.',
+          text: 'Please fill in the name field.',
           icon: 'warning',
         });
         return;
       }
 
+      if (!addSellerFormData.email || !/^\S+@\S+\.\S+$/.test(addSellerFormData.email)) {
+        handleCloseAddSellerModal();
+        Swal.fire({
+          title: 'Validation Error',
+          text: 'Please provide a valid email address.',
+          icon: 'warning',
+        });
+        return;
+      }
+
+      if (!addSellerFormData.phoneNumber || addSellerFormData.phoneNumber.length !== 10) {
+        handleCloseAddSellerModal();
+        Swal.fire({
+          title: 'Validation Error',
+          text: 'Please provide a valid 10-digit phone number.',
+          icon: 'warning',
+        });
+        return;
+      }
+
+      if (!addSellerFormData.password) {
+        handleCloseAddSellerModal();
+        Swal.fire({
+          title: 'Validation Error',
+          text: 'Please fill in the password field.',
+          icon: 'warning',
+        });
+        return;
+      }
       const requestData = {
         name: addSellerFormData.name,
         role: addSellerFormData.role,
@@ -328,19 +371,16 @@ function SellersPage() {
         password: addSellerFormData.password,
         phoneNumber: addSellerFormData.phoneNumber,
       };
-
       await axios.post(`${API_BASE_URL}/api/Seller/AddSeller`, requestData, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       });
-
       Swal.fire({
         title: 'Success',
         text: 'Seller added successfully',
         icon: 'success',
       });
-
       fetchSellers();
       handleCloseAddSellerModal();
       clearForm();
@@ -355,12 +395,7 @@ function SellersPage() {
         icon: 'error',
       });
     }
-
   };
-
-
-
-
   const handleExportToExcel = () => {
     try {
       // Check if any user is selected
@@ -372,10 +407,8 @@ function SellersPage() {
         });
         return;
       }
-
       // Filter selected users
       const selectedUsers = sellers.filter((seller) => selected.includes(seller.id));
-
       // Define the data to be exported
       const dataToExport = selectedUsers.map((seller) => ({
         Name: seller.name,
@@ -384,17 +417,13 @@ function SellersPage() {
         Role: seller.role,
         Password: seller.password,
       }));
-
       // Create a worksheet
       const ws = XLSX.utils.json_to_sheet(dataToExport);
-
       // Create a workbook
       const wb = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(wb, ws, 'SelectedSellers');
-
       // Save the file
       XLSX.writeFile(wb, 'selected_sellers.xlsx');
-
       Swal.fire({
         title: 'Success',
         text: 'Selected user exported to Excel successfully',
@@ -402,7 +431,6 @@ function SellersPage() {
       });
     } catch (error) {
       console.error('Error exporting to Excel:', error);
-
       Swal.fire({
         title: 'Error',
         text: 'An error occurred while exporting to Excel. Please try again.',
@@ -410,10 +438,6 @@ function SellersPage() {
       });
     }
   };
-
-
-
-
   return (
     <Container>
       <Stack direction="row" alignItems="center" justifyContent="space-between" mb={5}>
@@ -427,7 +451,7 @@ function SellersPage() {
           New Seller
         </Button>
 
-        
+
 
         <Modal open={openAddSellerModal} onClose={handleCloseAddSellerModal}>
           <ModalContent style={{ backgroundColor: 'white', padding: '20px' }}>
@@ -455,8 +479,6 @@ function SellersPage() {
                   <MenuItem value>Admin</MenuItem>
                 </Select>
               </FormControl>
-
-
               <TextField
                 fullWidth
                 label="PhoneNumber"
@@ -476,11 +498,20 @@ function SellersPage() {
               <TextField
                 fullWidth
                 label="Password"
-                type="password"
+                type={showAddSellerPassword ? 'text' : 'password'}
                 name="password"
                 value={addSellerFormData.password}
                 onChange={handleAddSellerFormChange}
                 variant="outlined"
+                InputProps={{
+                  endAdornment: (
+                    <InputAdornment position="end">
+                      <IconButton onClick={handleToggleAddSellerPasswordVisibility} edge="end">
+                        {showAddSellerPassword ? '👁️' : '👁️'}
+                      </IconButton>
+                    </InputAdornment>
+                  ),
+                }}
               />
 
               {/* Buttons to submit or cancel */}
@@ -495,9 +526,6 @@ function SellersPage() {
             </Stack>
           </ModalContent>
         </Modal>
-
-
-
         <Modal open={openEditSellerModal} onClose={handleCloseEditSellerModal}>
           <ModalContent style={{ backgroundColor: 'white', padding: '20px' }}>
             {/* Form fields for editing a seller */}
@@ -543,11 +571,20 @@ function SellersPage() {
               <TextField
                 fullWidth
                 label="Password"
-                type="password"
+                type={showEditSellerPassword ? 'text' : 'password'}
                 name="password"
                 value={editSellerFormData.password}
                 onChange={handleEditSellerFormChange}
                 variant="outlined"
+                InputProps={{
+                  endAdornment: (
+                    <InputAdornment position="end">
+                      <IconButton onClick={handleToggleEditSellerPasswordVisibility} edge="end">
+                        {showEditSellerPassword ? '👁️' : '👁️'}
+                      </IconButton>
+                    </InputAdornment>
+                  ),
+                }}
               />
 
               {/* Buttons to submit or cancel */}
@@ -563,19 +600,16 @@ function SellersPage() {
           </ModalContent>
         </Modal>
 
-        
+
 
 
       </Stack>
-
-
-
       <Card>
         <SellerTableToolbar
           numSelected={selected.length}
           filterName={filterName}
           onFilterName={handleFilterByName}
-          onExportToExcel = {handleExportToExcel}
+          onExportToExcel={handleExportToExcel}
         />
 
         <Scrollbar>
@@ -616,16 +650,13 @@ function SellersPage() {
                       onUpdate={handleUpdateUsers}
                     />
                   ))}
-
                 <TableEmptyRows
                   height={77}
                   emptyRows={emptyRows(page, rowsPerPage, sellers.length)}
                 />
-
                 {notFound && <TableNoData query={filterName} />}
               </TableBody>
             </Table>
-
             {/* Snackbar for success message */}
             <Snackbar
               open={showSuccessSnackbar}
@@ -637,7 +668,6 @@ function SellersPage() {
                 Seller added successfully!
               </Alert>
             </Snackbar>
-
             {/* Snackbar for error message */}
             <Snackbar
               open={showErrorSnackbar}
@@ -651,7 +681,6 @@ function SellersPage() {
             </Snackbar>
           </TableContainer>
         </Scrollbar>
-
         <TablePagination
           page={page}
           component="div"
@@ -665,5 +694,4 @@ function SellersPage() {
     </Container>
   );
 }
-
 export default SellersPage;
