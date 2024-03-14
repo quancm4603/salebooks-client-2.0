@@ -20,10 +20,8 @@ import {
   TextField,
   Typography,
   InputLabel,
-  IconButton,
   FormControl,
   TableContainer,
-  InputAdornment,
   TablePagination,
 } from '@mui/material';
 
@@ -65,19 +63,6 @@ function SellersPage() {
 
   const [openAddSellerModal, setOpenAddSellerModal] = useState(false);
   const [showErrorSnackbar, setShowErrorSnackbar] = useState(false);
-
-  // Trong component SellersPage
-  const [showAddSellerPassword, setShowAddSellerPassword] = useState(false);
-  const [showEditSellerPassword, setShowEditSellerPassword] = useState(false);
-
-  // Trong component SellersPage
-  const handleToggleAddSellerPasswordVisibility = () => {
-    setShowAddSellerPassword(!showAddSellerPassword);
-  };
-
-  const handleToggleEditSellerPasswordVisibility = () => {
-    setShowEditSellerPassword(!showEditSellerPassword);
-  };
 
 
 
@@ -130,83 +115,52 @@ function SellersPage() {
 
   const handleEditSeller = async () => {
     try {
-      const token = localStorage.getItem('jwttoken');
+        const token = localStorage.getItem('jwttoken');
 
-      // Validation
-      if (!editSellerFormData.name) {
-        handleCloseEditSellerModal();
-        Swal.fire({
-          title: 'Validation Error',
-          text: 'Please fill in the name field.',
-          icon: 'warning',
+        // Validation
+        if (!editSellerFormData.name || !editSellerFormData.email || !editSellerFormData.password || !editSellerFormData.phoneNumber) {
+            Swal.fire({
+                title: 'Validation Error',
+                text: 'Please fill in all required fields.',
+                icon: 'warning',
+            });
+            return;
+        }
+
+        const requestData = {
+            id: editSellerFormData.id,
+            name: editSellerFormData.name,
+            role: editSellerFormData.role,
+            email: editSellerFormData.email,
+            password: editSellerFormData.password,
+            phoneNumber: editSellerFormData.phoneNumber,
+        };
+
+        await axios.patch(`${API_BASE_URL}/api/Seller/UpdateSeller/${editSellerFormData.id}`, requestData, {
+            headers: {
+                Authorization: `Bearer ${token}`,
+            },
         });
-        return;
-      }
 
-      if (!editSellerFormData.email || !/^\S+@\S+\.\S+$/.test(editSellerFormData.email)) {
-        handleCloseEditSellerModal();
         Swal.fire({
-          title: 'Validation Error',
-          text: 'Please provide a valid email address.',
-          icon: 'warning',
+            title: 'Success',
+            text: 'Seller updated successfully',
+            icon: 'success',
         });
-        return;
-      }
 
-      if (!editSellerFormData.phoneNumber || editSellerFormData.phoneNumber.length !== 10) {
+        fetchSellers();  // This might be asynchronous
         handleCloseEditSellerModal();
-        Swal.fire({
-          title: 'Validation Error',
-          text: 'Please provide a valid 10-digit phone number.',
-          icon: 'warning',
-        });
-        return;
-      }
-
-      if (!editSellerFormData.password) {
-        handleCloseEditSellerModal();
-        Swal.fire({
-          title: 'Validation Error',
-          text: 'Please fill in the password field.',
-          icon: 'warning',
-        });
-        return;
-      }
-
-      const requestData = {
-        id: editSellerFormData.id,
-        name: editSellerFormData.name,
-        role: editSellerFormData.role,
-        email: editSellerFormData.email,
-        password: editSellerFormData.password,
-        phoneNumber: editSellerFormData.phoneNumber,
-      };
-
-      await axios.patch(`${API_BASE_URL}/api/Seller/UpdateSeller/${editSellerFormData.id}`, requestData, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      Swal.fire({
-        title: 'Success',
-        text: 'Seller updated successfully',
-        icon: 'success',
-      });
-
-      fetchSellers();  // This might be asynchronous
-      handleCloseEditSellerModal();
     } catch (err) {
-      console.error('Error updating seller:', err);
+        console.error('Error updating seller:', err);
 
-      Swal.fire({
-        title: 'Error',
-        text: 'An error occurred. Please try again.',
-        icon: 'error',
-      });
-      handleCloseEditSellerModal();
+        Swal.fire({
+            title: 'Error',
+            text: 'An error occurred. Please try again.',
+            icon: 'error',
+        });
+        handleCloseEditSellerModal();
     }
-  };
+};
 
 
 
@@ -247,11 +201,11 @@ function SellersPage() {
       if (response.ok) {
         const data = await response.json();
         // Chuyển đổi giá trị role từ true/false thành "User"/"Admin"
-        const updatedSellers = data.map((seller) => ({
-          ...seller,
-          role: seller.role ? "Admin" : "Seller",
-        }));
-        setSellers(updatedSellers);
+      const updatedSellers = data.map((seller) => ({
+        ...seller,
+        role: seller.role ? "Admin" : "Seller",
+      }));
+      setSellers(updatedSellers);
       } else {
         console.error('Failed to fetch Sellers');
         navigate('/login');
@@ -357,41 +311,11 @@ function SellersPage() {
       const token = localStorage.getItem('jwttoken');
 
       // Validation
-      if (!addSellerFormData.name) {
+      if (!addSellerFormData.name || !addSellerFormData.email || !addSellerFormData.password || !addSellerFormData.phoneNumber) {
         handleCloseAddSellerModal();
         Swal.fire({
           title: 'Validation Error',
-          text: 'Please fill in the name field.',
-          icon: 'warning',
-        });
-        return;
-      }
-
-      if (!addSellerFormData.email || !/^\S+@\S+\.\S+$/.test(addSellerFormData.email)) {
-        handleCloseAddSellerModal();
-        Swal.fire({
-          title: 'Validation Error',
-          text: 'Please provide a valid email address.',
-          icon: 'warning',
-        });
-        return;
-      }
-
-      if (!addSellerFormData.phoneNumber || addSellerFormData.phoneNumber.length !== 10) {
-        handleCloseAddSellerModal();
-        Swal.fire({
-          title: 'Validation Error',
-          text: 'Please provide a valid 10-digit phone number.',
-          icon: 'warning',
-        });
-        return;
-      }
-
-      if (!addSellerFormData.password) {
-        handleCloseAddSellerModal();
-        Swal.fire({
-          title: 'Validation Error',
-          text: 'Please fill in the password field.',
+          text: 'Please fill in all required fields.',
           icon: 'warning',
         });
         return;
@@ -503,7 +427,7 @@ function SellersPage() {
           New Seller
         </Button>
 
-
+        
 
         <Modal open={openAddSellerModal} onClose={handleCloseAddSellerModal}>
           <ModalContent style={{ backgroundColor: 'white', padding: '20px' }}>
@@ -552,20 +476,11 @@ function SellersPage() {
               <TextField
                 fullWidth
                 label="Password"
-                type={showAddSellerPassword ? 'text' : 'password'}
+                type="password"
                 name="password"
                 value={addSellerFormData.password}
                 onChange={handleAddSellerFormChange}
                 variant="outlined"
-                InputProps={{
-                  endAdornment: (
-                    <InputAdornment position="end">
-                      <IconButton onClick={handleToggleAddSellerPasswordVisibility} edge="end">
-                        {showAddSellerPassword ? '👁️' : '👁️'}
-                      </IconButton>
-                    </InputAdornment>
-                  ),
-                }}
               />
 
               {/* Buttons to submit or cancel */}
@@ -628,20 +543,11 @@ function SellersPage() {
               <TextField
                 fullWidth
                 label="Password"
-                type={showEditSellerPassword ? 'text' : 'password'}
+                type="password"
                 name="password"
                 value={editSellerFormData.password}
                 onChange={handleEditSellerFormChange}
                 variant="outlined"
-                InputProps={{
-                  endAdornment: (
-                    <InputAdornment position="end">
-                      <IconButton onClick={handleToggleEditSellerPasswordVisibility} edge="end">
-                        {showEditSellerPassword ? '👁️' : '👁️'}
-                      </IconButton>
-                    </InputAdornment>
-                  ),
-                }}
               />
 
               {/* Buttons to submit or cancel */}
@@ -657,7 +563,7 @@ function SellersPage() {
           </ModalContent>
         </Modal>
 
-
+        
 
 
       </Stack>
@@ -669,7 +575,7 @@ function SellersPage() {
           numSelected={selected.length}
           filterName={filterName}
           onFilterName={handleFilterByName}
-          onExportToExcel={handleExportToExcel}
+          onExportToExcel = {handleExportToExcel}
         />
 
         <Scrollbar>
