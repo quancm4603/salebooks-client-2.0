@@ -10,8 +10,11 @@ import TableContainer from '@mui/material/TableContainer';
 import TablePagination from '@mui/material/TablePagination';
 import axios from 'axios'; // Import thư viện axios để thực hiện HTTP requests
 
+
 import Iconify from 'src/components/iconify';
 import Scrollbar from 'src/components/scrollbar';
+import { API_BASE_URL } from '../../../../config';
+
 import FormDialog from '../user-newcustomer-formdialog';
 import TableNoData from '../table-no-data';
 import UserTableRow from '../user-table-row';
@@ -32,16 +35,61 @@ export default function UserPage() {
   useEffect(() => {
     // Gọi API khi component được render
     fetchCustomers();
+    
   }, []);
 
   const fetchCustomers = async () => {
     try {
-      const response = await axios.get('https://localhost:7196/api/Customer/GetCustomer');
-      setCustomers(response.data); // Lưu trữ dữ liệu khách hàng từ API vào state
+      const token = localStorage.getItem('jwttoken');
+      const response = await fetch(`${API_BASE_URL}/api/Customer/GetCustomer`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      if (response.ok) {
+        const data = await response.json();
+        console.log(data);
+        setCustomers(data);
+      } else {
+        console.error('Failed to fetch setCustomers');
+      }
     } catch (error) {
-      console.error('Error fetching customers:', error);
+      console.error('Error fetching setCustomers:', error);
     }
-  };
+  }
+
+
+  // const fetchCustomers = async () => {
+  //   try {
+  //     const token = localStorage.getItem('jwttoken');
+  //     const response = await axios.get('https://localhost:7196/api/Customer/GetCustomer',{
+  //       headers: {
+  //         Authorization: `Bearer ${token}`,
+  //       }, 
+  //     });
+  //     if (response.ok) {
+  //       const data = await response.json();
+  //       console.log(data);
+  //       setCustomers(response.data); // Lưu trữ dữ liệu khách hàng từ API vào state
+
+  //     } else {
+  //       console.error('Failed to fetch customer');
+  //     }
+      
+  //   } catch (error) {
+  //     console.error('Error fetching customers:', error);
+  //   }
+  // };
+
+  // const fetchCustomers = async () => {
+  //   try {
+  //     const response = await axios.get('https://localhost:7196/api/Customer/GetCustomer');
+  //     setCustomers(response.data); // Lưu trữ dữ liệu khách hàng từ API vào state
+  //   } catch (error) {
+  //     console.error('Error fetching customers:', error);
+  //   }
+  // };
+
 
   const handleSort = (event, id) => {
     const isAsc = orderBy === id && order === 'asc';
@@ -128,16 +176,11 @@ export default function UserPage() {
                 headLabel={[
                   { id: 'name', label: 'Name' },
                   { id: 'companyName', label: 'Company' },
-
-
                   { id: 'email', label: 'Email' },
                   { id: 'mobile', label: 'Mobile No' },
                   { id: 'province', label: 'Province' },
-                  { id: 'district', label: 'District' },
-
+                  { id: 'Spend/Quarter', label: 'Spend/Quarter' },
                   { id: 'address', label: 'Address' },
-
-
                   { id: '' },
                 ]}
               />
@@ -148,13 +191,11 @@ export default function UserPage() {
                     <UserTableRow
                       key={row.id}
                       avatarUrl={row.avatarUrl}
-
                       name={row.name}
                       companyName={row.companyName}
                       email={row.email}
                       mobile={row.mobile}
                       province={row.province}
-                      district={row.district}
                       address={row.address}
                       customerId={row.customerId}
                       selected={selected.indexOf(row.name) !== -1}

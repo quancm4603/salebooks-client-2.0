@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import Swal from 'sweetalert2';
 import Iconify from 'src/components/iconify';
 import axios from 'axios';
@@ -13,12 +13,14 @@ import Checkbox from '@mui/material/Checkbox';
 import TableCell from '@mui/material/TableCell';
 import Typography from '@mui/material/Typography';
 import IconButton from '@mui/material/IconButton';
+import Label from 'src/components/label';
+
 import { Button, TextField, Dialog, Grid, DialogActions, DialogContent, DialogContentText, DialogTitle, Select, MenuItem, FormControl, InputLabel } from '@mui/material';
+import CustomerOrderHistory from './customer-order-column'; // Đường dẫn tới component CustomerOrderHistory
 
 /* Nó sử dụng các thành phần của Material-UI để thiết kế và chức năng, bao gồm TableRow, 
 TableCell, Checkbox, IconButton, Popover, và MenuItem. */
 
-import Label from 'src/components/label';
 
 // ----------------------------------------------------------------------
 /*  định nghĩa một thành phần React có tên là UserTableRow được sử dụng để hiển thị một dòng của bảng chứa thông tin người dùng. */
@@ -38,7 +40,7 @@ export default function UserTableRow({
   handleClick,
   customerId
 
-  
+
 }) {
 
   const [open, setOpen] = useState(null);
@@ -147,6 +149,86 @@ export default function UserTableRow({
   const [districts, setDistricts] = useState([]);
   const [wards, setWards] = useState([]);
 
+  const getCurrentQuarter = useCallback(() => {
+    const now = new Date();
+    const currentYear = now.getFullYear();
+    const currentMonth = now.getMonth() + 1;
+    let quarter;
+
+    if (currentMonth >= 1 && currentMonth <= 3) {
+      quarter = 1;
+    } else if (currentMonth >= 4 && currentMonth <= 6) {
+      quarter = 2;
+    } else if (currentMonth >= 7 && currentMonth <= 9) {
+      quarter = 3;
+    } else {
+      quarter = 4;
+    }
+
+    return { currentYear, quarter };
+  }, []);
+
+  const [totalOrderValue, setTotalOrderValue] = useState(null);
+
+  const fetchTotalOrderValue = useCallback(async (customerIdV) => {
+    try {
+      const { currentYear, quarter } = getCurrentQuarter();
+      const token = localStorage.getItem('jwttoken');
+
+      const response = await axios.put(`https://localhost:7196/api/Customer/TotalOrderQuarter?customerId=${customerIdV}&year=${currentYear}&quarter=${quarter}`,
+        {}, // No data to send in the request body
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (response.status === 200) { // Check for successful status code
+        const data = response.data; // No need for response.json(), axios handles it
+        console.log(data);
+        setTotalOrderValue(data);
+      } else {
+        console.error('Failed to fetch setCustomers');
+      }
+    } catch (error) {
+      console.error('Error fetching total order value:', error);
+    }
+  }, [getCurrentQuarter]);
+
+  // const fetchTotalOrderValue = useCallback(async (customerIdV) => {
+  //   try {
+  //     const { currentYear, quarter } = getCurrentQuarter();
+  //     const token = localStorage.getItem('jwttoken');
+  //     const response = await axios.put(`https://localhost:7196/api/Customer/TotalOrderQuarter?customerId=${customerIdV}&year=${currentYear}&quarter=${quarter}`, {
+  //       headers: {
+  //         Authorization: `Bearer ${token}`,
+  //       },
+  //     });
+
+
+  //     if (response.ok) {
+  //       const data = await response.json();
+  //       console.log(data);
+  //       setTotalOrderValue(data);
+  //     } else {
+  //       console.error('Failed to fetch setCustomers');
+  //     }
+
+
+  //   } catch (error) {
+  //     console.error('Error fetching total order value:', error);
+  //   }
+  // }, [getCurrentQuarter]);
+
+
+
+  const fetchTotalOrderValueCallback = useCallback(fetchTotalOrderValue, [fetchTotalOrderValue]);
+
+
+
+
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -157,7 +239,13 @@ export default function UserTableRow({
       }
     };
     fetchData();
-  }, []);
+    if (customerId != null) {
+      fetchTotalOrderValue(customerId);
+    }
+
+  }, [customerId, fetchTotalOrderValue]);
+
+
 
   const handleCityChange = (event) => {
     const selectedCityId = event.target.value;
@@ -219,36 +307,172 @@ export default function UserTableRow({
     customerId: '',
   });
 
+//   try {
+//     const token = localStorage.getItem('jwttoken');
+//     const response = await fetch(`${API_BASE_URL}/api/Quotation/${quotationId}`, {
+//       headers: {
+//         Authorization: `Bearer ${token}`,
+//       },
+//     });
 
-  const handleOpenMenuEdit = async (selectedCustomerId) => { // Thêm async ở đây
+//     if (response.ok) {
+//       const data = await response.json();
+//       return data;
+//     }
+
+//     console.error(`Failed to fetch quotation details for ID ${quotationId}`);
+//   } catch (error) {
+//     console.error('Error fetching quotation details:', error);
+//   }
+
+//   return [];
+// };
+
+  // const handleOpenMenuEdit = async (selectedCustomerId) => {
+  //   try {
+  //    const token = localStorage.getItem('jwttoken');
+  
+  //     // Kiểm tra xem có mã token hay không
+  //     if (!token) {
+  //       throw new Error('Không tìm thấy mã token');
+  //     }
+  
+  
+  
+  //     // Gửi yêu cầu lấy thông tin chi tiết của khách hàng
+  //     const response = await fetch(`https://localhost:7196/api/Customer/DetailCustomer${selectedCustomerId}`,  {
+  //             headers: {
+  //               Authorization: `Bearer ${token}`,
+  //             },
+  //             });
+  
+  //     // Kiểm tra xem yêu cầu có thành công hay không
+  //     if (response.ok) {
+  //             const data = await response.json();
+  //             setFormDataDetail(data);
+  
+  //             // Mở form chỉnh sửa
+  //             setOpenDialog(true);            }
+  
+   
+  //   } catch (error) {
+  //     console.error('Lỗi khi lấy thông tin chi tiết khách hàng:', error.message);
+  //   }
+  // };
+  
+  const handleOpenMenuEdit = async (selectedCustomerId) => {
     try {
-      // Lấy thông tin chi tiết của khách hàng từ API
-      const response = await fetch(`https://localhost:7196/api/Customer/DetailCustomer${selectedCustomerId}`);
-      const data = await response.json();
-      // Cập nhật formDataDetail với dữ liệu của khách hàng
-      setFormDataDetail(data);
-      // Mở form chỉnh sửa
-      setOpenDialog(true);
+      const token = localStorage.getItem('jwttoken');
+  
+      // Kiểm tra xem có mã token hay không
+      if (!token) {
+        throw new Error('Không tìm thấy mã token');
+      }
+  
+      // Gửi yêu cầu lấy thông tin chi tiết của khách hàng bằng axios
+      const response = await axios.get(`https://localhost:7196/api/Customer/DetailCustomer/${selectedCustomerId}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+  
+      // Kiểm tra xem yêu cầu có thành công hay không
+      if (response.status === 200) {
+        const data = response.data;
+        setFormDataDetail(data);
+        setOpenDialog(true);
+      } else {
+        console.error('Failed to fetch setCustomers');
+      }
     } catch (error) {
-      console.error('Lỗi khi lấy thông tin chi tiết khách hàng:', error);
+      console.error('Lỗi khi lấy thông tin chi tiết khách hàng:', error.message);
     }
   };
-
   
-  const handleOpenMenuDetail = async (selectedCustomerId) => { // Thêm async ở đây
+
+
+  // const handleOpenMenuEdit = async (selectedCustomerId) => { // Thêm async ở đây
+  //   try {
+  //     // Lấy thông tin chi tiết của khách hàng từ API
+  //     const token = localStorage.getItem('jwttoken');
+  //     const response = await fetch(`https://localhost:7196/api/Customer/DetailCustomer${selectedCustomerId}`,
+  //       {}, // No data to send in the request body
+  //       {
+  //         headers: {
+  //           Authorization: `Bearer ${token}`,
+  //         },
+  //       });
+
+  //     if (response.status === 200) { // Check for successful status code
+  //       const data = await response.json();
+  //       console.log(data);
+  //       // Cập nhật formDataDetail với dữ liệu của khách hàng
+  //       setFormDataDetail(data);
+  //       // Mở form chỉnh sửa
+  //       setOpenDialog(true);
+  //     } else {
+  //       console.error('Failed to fetch setCustomers');
+  //     }
+
+  //   } catch (error) {
+  //     console.error('Lỗi khi lấy thông tin chi tiết khách hàng:', error);
+  //   }
+  // };
+
+
+  // const handleOpenMenuDetail = async (selectedCustomerId) => { // Thêm async ở đây
+  //   try {
+  //     // Lấy thông tin chi tiết của khách hàng từ API
+  //     const response = await fetch(`https://localhost:7196/api/Customer/DetailCustomer/${selectedCustomerId}`);
+  //     const data = await response.json();
+  //     // Cập nhật formDataDetail với dữ liệu của khách hàng
+  //     setFormDataDetail(data);
+  //     // Mở form chỉnh sửa
+  //     setOpenDialogDetail(true);
+  //   } catch (error) {
+  //     console.error('Lỗi khi lấy thông tin chi tiết khách hàng:', error);
+  //   }
+  // };
+
+  const handleOpenMenuDetail = async (selectedCustomerId) => {
     try {
-      // Lấy thông tin chi tiết của khách hàng từ API
-      const response = await fetch(`https://localhost:7196/api/Customer/DetailCustomer${selectedCustomerId}`);
-      const data = await response.json();
-      // Cập nhật formDataDetail với dữ liệu của khách hàng
-      setFormDataDetail(data);
-      // Mở form chỉnh sửa
-      setOpenDialogDetail(true);
+      const token = localStorage.getItem('jwttoken');
+  
+      // Kiểm tra xem có mã token hay không
+      if (!token) {
+        throw new Error('Không tìm thấy mã token');
+      }
+  
+      // Gửi yêu cầu lấy thông tin chi tiết của khách hàng bằng axios
+      const response = await axios.get(`https://localhost:7196/api/Customer/DetailCustomer/${selectedCustomerId}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+  
+      // Kiểm tra xem yêu cầu có thành công hay không
+      if (response.status === 200) {
+        const data = response.data;
+        setFormDataDetail(data);
+        setOpenDialogDetail(true);
+      } else {
+        console.error('Failed to fetch setCustomers');
+      }
     } catch (error) {
-      console.error('Lỗi khi lấy thông tin chi tiết khách hàng:', error);
+      console.error('Lỗi khi lấy thông tin chi tiết khách hàng:', error.message);
     }
   };
   
+
+  // TÍNH GIÁ TRỊ ĐƠN HÀNG THEO QUÝ BEGIN
+
+
+
+
+
+  // TÍNH GIÁ TRỊ ĐƠN HÀNG THEO QUÝ END
+
+
   /* Mã JSX render dòng bảng với các ô chứa thông tin người dùng. */
   return (
     <>
@@ -271,12 +495,12 @@ export default function UserTableRow({
         <TableCell>{email}</TableCell>
         <TableCell>{mobile}</TableCell>
         <TableCell>{province}</TableCell>
-        <TableCell>{district}</TableCell>
+        <TableCell>{totalOrderValue !== null ? totalOrderValue.toFixed(2) : 'Loading...'}</TableCell> {/* Giá trị đơn hàng của quý */}
         <TableCell>{address}</TableCell>
 
 
 
-     
+
 
         <TableCell align="right">
           {/* Một IconButton với biểu tượng 'more-vertical-fill' được sử dụng để mở menu popover. */}
@@ -307,9 +531,9 @@ export default function UserTableRow({
         </MenuItem>
 
         {/* <MenuItem onClick={handleCloseMenu} sx={{ color: 'error.main' }}>
-          <Iconify icon="eva:trash-2-outline" sx={{ mr: 2 }} />
-          Delete
-        </MenuItem> */}
+            <Iconify icon="eva:trash-2-outline" sx={{ mr: 2 }} />
+            Delete
+          </MenuItem> */}
       </Popover>
 
       <Dialog open={openDialog} onClose={handleCloseMenuEdit}>
@@ -425,7 +649,7 @@ export default function UserTableRow({
                       <Select
                         value={formDataDetail.province}
                         onChange={handleCityChange}
-                        label= {formDataDetail.province}
+                        label={formDataDetail.province}
                       >
                         <MenuItem value={formDataDetail.province} disabled>{formDataDetail.province}</MenuItem>
                         {cities.map(city => (
@@ -437,7 +661,7 @@ export default function UserTableRow({
                   <Grid item>
                     <FormControl fullWidth>
                       <InputLabel>District</InputLabel>
-                    
+
                       <Select
                         value={formDataDetail.district}
                         onChange={handleDistrictChange}
@@ -458,7 +682,7 @@ export default function UserTableRow({
                         onChange={handleWardChange}
                         label="Ward"
                       >
-                        <MenuItem value={formDataDetail.ward}  disabled>{formDataDetail.ward}</MenuItem>
+                        <MenuItem value={formDataDetail.ward} disabled>{formDataDetail.ward}</MenuItem>
                         {wards.map(ward => (
                           <MenuItem key={ward.Id} value={ward.Id}>{ward.Name}</MenuItem>
                         ))}
@@ -504,14 +728,14 @@ export default function UserTableRow({
       </Dialog>
 
 
-      <Dialog open={openDialogDetail} onClose={handleCloseMenuDetail}>
+      <Dialog open={openDialogDetail} onClose={handleCloseMenuDetail} PaperProps={{ style: { width: '1000px', maxWidth: '90vw' } }} >
         <form onSubmit={handleSubmit}>
           <DialogTitle>Customer Detail</DialogTitle>
           <DialogContent>
 
 
             <Grid container spacing={3}>
-              <Grid item xs={6}>
+              <Grid item xs={4}>
                 <Grid container spacing={2} direction="column">
                   <Grid item>
                     <h3>Customer Information</h3>
@@ -611,7 +835,8 @@ export default function UserTableRow({
 
                 </Grid>
               </Grid>
-              <Grid item xs={6}>
+
+              <Grid item xs={4}>
                 <Grid container spacing={2} direction="column">
                   <Grid item>
                     <h3>Customer Address</h3>
@@ -622,7 +847,7 @@ export default function UserTableRow({
                       <Select
                         value={formDataDetail.province}
                         onChange={handleCityChange}
-                        label= {formDataDetail.province}
+                        label={formDataDetail.province}
                         readOnly
                       >
                         <MenuItem value={formDataDetail.province} disabled>{formDataDetail.province}</MenuItem>
@@ -635,7 +860,7 @@ export default function UserTableRow({
                   <Grid item>
                     <FormControl fullWidth>
                       <InputLabel>District</InputLabel>
-                    
+
                       <Select
                         value={formDataDetail.district}
                         onChange={handleDistrictChange}
@@ -658,7 +883,7 @@ export default function UserTableRow({
                         label="Ward"
                         readOnly
                       >
-                        <MenuItem value={formDataDetail.ward}  disabled>{formDataDetail.ward}</MenuItem>
+                        <MenuItem value={formDataDetail.ward} disabled>{formDataDetail.ward}</MenuItem>
                         {wards.map(ward => (
                           <MenuItem key={ward.Id} value={ward.Id}>{ward.Name}</MenuItem>
                         ))}
@@ -694,6 +919,16 @@ export default function UserTableRow({
                   </Grid>
                 </Grid>
               </Grid>
+
+              <Grid item xs={4}>
+                <Grid container spacing={2} direction="column">
+                  <Grid item>
+                    <h3>Customer Order History</h3>
+                    <CustomerOrderHistory customerId={customerId} />
+                  </Grid>
+                </Grid>
+              </Grid>
+
             </Grid>
           </DialogContent>
 
