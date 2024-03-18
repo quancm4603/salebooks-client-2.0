@@ -44,6 +44,7 @@ export default function QuotationTableRow({
   status,
   handleClick,
   updateQuotationStatus,
+  fetchQuotations,
 }) {
   const [anchorEl, setAnchorEl] = useState(null);
 
@@ -123,6 +124,7 @@ export default function QuotationTableRow({
       if (response.ok) {
         console.log('Quotation confirmed successfully.');
         updateQuotationStatus(num, 'To Invoice');
+        fetchQuotations();
         handleCloseConfirmDialog();
         handleCloseMenu();
         Swal.fire({
@@ -158,6 +160,7 @@ export default function QuotationTableRow({
       if (response.ok) {
         console.log('Quotation canceled successfully.');
         updateQuotationStatus(num, 'Cancelled');
+        fetchQuotations();
         handleCloseCancelDialog();
         handleCloseMenu();
         Swal.fire({
@@ -295,7 +298,7 @@ export default function QuotationTableRow({
 
         <TableCell>{formatCreatedAt(createAt)}</TableCell>
 
-        <TableCell>{price}VNĐ</TableCell>
+        <TableCell>{price.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}</TableCell>
 
         <TableCell align="right">
           <IconButton onClick={handleOpenMenu}>
@@ -340,7 +343,7 @@ export default function QuotationTableRow({
                         <TableRow key={detail.id}>
                           <TableCell>{detail.product.name}</TableCell>
                           <TableCell>{detail.quantity}</TableCell>
-                          <TableCell>{detail.subTotal}VNĐ</TableCell>
+                          <TableCell>{detail.subTotal.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}</TableCell>
                           <TableCell>{detail.product.tax * 100}%</TableCell>
                         </TableRow>
                       ))}
@@ -350,7 +353,7 @@ export default function QuotationTableRow({
                         <TableCell colSpan={2} className="text-right">
                           <Typography variant="strong">Total:</Typography>
                         </TableCell>
-                        <TableCell>{total}VNĐ</TableCell>
+                        <TableCell>{total.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}</TableCell>
                       </TableRow>
                     </TableBody>
                   </Table>
@@ -452,6 +455,7 @@ QuotationTableRow.propTypes = {
   status: PropTypes.string,
   handleClick: PropTypes.func,
   updateQuotationStatus: PropTypes.func,
+  fetchQuotations: PropTypes.func,
 };
 
 function formatCreatedAt(createdAt) {
