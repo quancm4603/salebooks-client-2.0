@@ -91,16 +91,7 @@ export default function AppView() {
   return (
     <Container maxWidth="xl">
       <Grid container spacing={3}>
-        <Grid xs={12} sm={6} md={4}>
-          <AppWidgetSummary
-            title="Weekly Sales"
-            total={714000}
-            color="success"
-            icon={<img alt="icon" src="/assets/icons/glass/ic_glass_bag.png" />}
-          />
-        </Grid>
-
-        <Grid xs={12} sm={6} md={4}>
+        <Grid xs={12} sm={6} md={3}>
           <AppWidgetSummary
             title="New Users"
             total={1352831}
@@ -109,7 +100,7 @@ export default function AppView() {
           />
         </Grid>
 
-        <Grid xs={12} sm={6} md={4}>
+        <Grid xs={12} sm={6} md={3}>
           <AppWidgetSummary
             title="Item Orders"
             total={countFullyInvoicedQuotations()}
@@ -119,14 +110,13 @@ export default function AppView() {
         </Grid>
 
         <Grid xs={12} sm={6} md={6}>
-        {/* <Grid xs={12} sm={6} md={3}>
           <AppWidgetSummary
             title="Quotation Needs To Be Confirmed"
             total={countQuotationQuotations()}
             color="error"
             icon={<img alt="icon" src="/assets/icons/glass/ic_glass_message.png" />}
           />
-        </Grid> */}
+        </Grid>
 
         <Grid xs={12} md={6} lg={8}>
           <AppWebsiteVisits
