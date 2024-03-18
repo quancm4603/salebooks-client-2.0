@@ -1,14 +1,13 @@
+import Swal from 'sweetalert2';
 import { useState } from 'react';
 import PropTypes from 'prop-types';
 
 import Stack from '@mui/material/Stack';
 import Button from '@mui/material/Button';
 import Dialog from '@mui/material/Dialog';
-import MuiAlert from '@mui/material/Alert';
 import Popover from '@mui/material/Popover';
 import TableRow from '@mui/material/TableRow';
 import Checkbox from '@mui/material/Checkbox';
-import Snackbar from '@mui/material/Snackbar';
 import MenuItem from '@mui/material/MenuItem';
 import TableCell from '@mui/material/TableCell';
 import Typography from '@mui/material/Typography';
@@ -19,11 +18,7 @@ import DialogActions from '@mui/material/DialogActions';
 
 import Iconify from 'src/components/iconify';
 
-import { API_BASE_URL } from '../../../config'; // Import your API_BASE_URL
-
-
-
-// ----------------------------------------------------------------------
+import { API_BASE_URL } from '../../../config';
 
 export default function SellerTableRow({
   id,
@@ -42,9 +37,9 @@ export default function SellerTableRow({
     handleCloseMenu();
     onEdit(id);
   };
+
   const [openPopover, setOpenPopover] = useState(null);
   const [openDialog, setOpenDialog] = useState(false);
-  const [showSuccessSnackbar, setShowSuccessSnackbar] = useState(false);
 
   const handleOpenMenu = (event) => {
     setOpenPopover(event.currentTarget);
@@ -74,10 +69,12 @@ export default function SellerTableRow({
       });
       if (response.ok) {
         handleCloseDialog();
-        setShowSuccessSnackbar(true);
-        setTimeout(() => {
-          onUpdate(id);
-        }, 1000);
+        Swal.fire({
+          icon: 'success',
+          title: 'Success',
+          text: 'Seller deleted successfully!',
+          onClose: () => onUpdate(id),
+        });
       } else {
         console.error('Error deleting seller:', response.statusText);
       }
@@ -149,24 +146,6 @@ export default function SellerTableRow({
           </Button>
         </DialogActions>
       </Dialog>
-
-      {/* Success Snackbar */}
-      <Snackbar
-        open={showSuccessSnackbar}
-        autoHideDuration={6000} // Duration in milliseconds
-        onClose={() => setShowSuccessSnackbar(false)}
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
-      >
-        <MuiAlert
-          elevation={6}
-          variant="filled"
-          severity="success"
-          onClose={() => setShowSuccessSnackbar(false)}
-          onUpdate={onUpdate}
-        >
-          Seller deleted successfully!
-        </MuiAlert>
-      </Snackbar>
     </>
   );
 }

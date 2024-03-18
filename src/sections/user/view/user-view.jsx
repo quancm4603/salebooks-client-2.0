@@ -1,6 +1,7 @@
 import axios from 'axios';
 import * as XLSX from 'xlsx';
 import Swal from 'sweetalert2';
+import { isNaN } from 'lodash';
 import { useNavigate } from 'react-router-dom';
 import React, { useState, useEffect, useCallback } from 'react';
 
@@ -61,6 +62,11 @@ function SellersPage() {
   const [openAddSellerModal, setOpenAddSellerModal] = useState(false);
   const [showErrorSnackbar, setShowErrorSnackbar] = useState(false);
 
+
+  const [addSellerError, setAddSellerError] = useState(null); // State to store the error message
+  const [editSellerError, setEditSellerError] = useState(null); // State để lưu trữ thông báo lỗi
+
+
   // Trong component SellersPage
   const [showAddSellerPassword, setShowAddSellerPassword] = useState(false);
   const [showEditSellerPassword, setShowEditSellerPassword] = useState(false);
@@ -117,6 +123,9 @@ function SellersPage() {
       ...prevData,
       [name]: type === 'checkbox' ? checked : value,
     }));
+
+    // Xóa thông báo lỗi trước đó khi người dùng bắt đầu chỉnh sửa form
+    setEditSellerError(null);
   };
 
   const handleEditSeller = async () => {
@@ -125,42 +134,22 @@ function SellersPage() {
 
       // Validation
       if (!editSellerFormData.name) {
-        handleCloseEditSellerModal();
-        Swal.fire({
-          title: 'Validation Error',
-          text: 'Please fill in the name field.',
-          icon: 'warning',
-        });
+        setEditSellerError('Please fill in the name field.'); // Set thông báo lỗi
         return;
       }
 
       if (!editSellerFormData.email || !/^\S+@\S+\.\S+$/.test(editSellerFormData.email)) {
-        handleCloseEditSellerModal();
-        Swal.fire({
-          title: 'Validation Error',
-          text: 'Please provide a valid email address.',
-          icon: 'warning',
-        });
+        setEditSellerError('Please provide a valid email address.'); // Set thông báo lỗi
         return;
       }
 
-      if (!editSellerFormData.phoneNumber || editSellerFormData.phoneNumber.length !== 10) {
-        handleCloseEditSellerModal();
-        Swal.fire({
-          title: 'Validation Error',
-          text: 'Please provide a valid 10-digit phone number.',
-          icon: 'warning',
-        });
+      if (!editSellerFormData.phoneNumber || isNaN(editSellerFormData.phoneNumber) || editSellerFormData.phoneNumber.length !== 10) {
+        setEditSellerError('Please provide a valid 10-digit phone number.'); // Set error message
         return;
       }
 
-      if (!editSellerFormData.password) {
-        handleCloseEditSellerModal();
-        Swal.fire({
-          title: 'Validation Error',
-          text: 'Please fill in the password field.',
-          icon: 'warning',
-        });
+      if (!editSellerFormData.password || editSellerFormData.password.length < 6 || !/[!@#$%^&*(),.?":{}|<>]/.test(editSellerFormData.password)) {
+        setEditSellerError('Password must have at least 6 characters, and must contain special characters.'); // Set error message
         return;
       }
 
@@ -172,30 +161,25 @@ function SellersPage() {
         password: editSellerFormData.password,
         phoneNumber: editSellerFormData.phoneNumber,
       };
-
       await axios.patch(`${API_BASE_URL}/api/Seller/UpdateSeller/${editSellerFormData.id}`, requestData, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       });
-
       Swal.fire({
         title: 'Success',
         text: 'Seller updated successfully',
         icon: 'success',
       });
-
-      fetchSellers();  // This might be asynchronous
+      fetchSellers();
       handleCloseEditSellerModal();
     } catch (err) {
       console.error('Error updating seller:', err);
-
       Swal.fire({
         title: 'Error',
         text: 'An error occurred. Please try again.',
         icon: 'error',
       });
-      handleCloseEditSellerModal();
     }
   };
 
@@ -319,51 +303,36 @@ function SellersPage() {
       ...prevData,
       [name]: type === 'checkbox' ? checked : value,
     }));
+
+    // Clear previous error message when user starts editing the form
+    setAddSellerError(null);
   };
+
   const handleAddSeller = async () => {
     try {
       const token = localStorage.getItem('jwttoken');
 
       // Validation
       if (!addSellerFormData.name) {
-        handleCloseAddSellerModal();
-        Swal.fire({
-          title: 'Validation Error',
-          text: 'Please fill in the name field.',
-          icon: 'warning',
-        });
+        setAddSellerError('Please fill in the name field.'); // Set error message
         return;
       }
 
       if (!addSellerFormData.email || !/^\S+@\S+\.\S+$/.test(addSellerFormData.email)) {
-        handleCloseAddSellerModal();
-        Swal.fire({
-          title: 'Validation Error',
-          text: 'Please provide a valid email address.',
-          icon: 'warning',
-        });
+        setAddSellerError('Please provide a valid email address.'); // Set error message
         return;
       }
 
-      if (!addSellerFormData.phoneNumber || addSellerFormData.phoneNumber.length !== 10) {
-        handleCloseAddSellerModal();
-        Swal.fire({
-          title: 'Validation Error',
-          text: 'Please provide a valid 10-digit phone number.',
-          icon: 'warning',
-        });
+      if (!addSellerFormData.phoneNumber || isNaN(addSellerFormData.phoneNumber) || addSellerFormData.phoneNumber.length !== 10) {
+        setAddSellerError('Please provide a valid 10-digit phone number.'); // Set error message
         return;
       }
 
-      if (!addSellerFormData.password) {
-        handleCloseAddSellerModal();
-        Swal.fire({
-          title: 'Validation Error',
-          text: 'Please fill in the password field.',
-          icon: 'warning',
-        });
+      if (!addSellerFormData.password || addSellerFormData.password.length < 6 || !/[!@#$%^&*(),.?":{}|<>]/.test(addSellerFormData.password)) {
+        setAddSellerError('Password must have at least 6 characters, and must contain special characters.'); // Set error message
         return;
       }
+
       const requestData = {
         name: addSellerFormData.name,
         role: addSellerFormData.role,
@@ -396,6 +365,7 @@ function SellersPage() {
       });
     }
   };
+
   const handleExportToExcel = () => {
     try {
       // Check if any user is selected
@@ -457,6 +427,9 @@ function SellersPage() {
           <ModalContent style={{ backgroundColor: 'white', padding: '20px' }}>
             {/* Form fields for adding a new seller */}
             <Stack spacing={2}>
+              {addSellerError && ( // Display error message if exists
+                <Alert severity="error">{addSellerError}</Alert>
+              )}
               <TextField
                 fullWidth
                 label="Name"
@@ -526,10 +499,16 @@ function SellersPage() {
             </Stack>
           </ModalContent>
         </Modal>
+
+
+
         <Modal open={openEditSellerModal} onClose={handleCloseEditSellerModal}>
           <ModalContent style={{ backgroundColor: 'white', padding: '20px' }}>
             {/* Form fields for editing a seller */}
             <Stack spacing={2}>
+              {editSellerError && ( // Hiển thị thông báo lỗi nếu có
+                <Alert severity="error">{editSellerError}</Alert>
+              )}
               <TextField
                 fullWidth
                 label="Name"
@@ -587,15 +566,24 @@ function SellersPage() {
                 }}
               />
 
-              {/* Buttons to submit or cancel */}
-              <Stack direction="row" spacing={2} justifyContent="flex-end" mt={2}>
-                <Button variant="contained" color="primary" onClick={handleEditSeller}>
-                  Update Seller
-                </Button>
-                <Button onClick={handleCloseEditSellerModal} variant="outlined">
-                  Cancel
-                </Button>
-              </Stack>
+            </Stack>
+            {/* Display existing seller information */}
+            <Typography variant="h6" sx={{ mt: 2 }}>Existing Information:</Typography>
+            <Stack spacing={1} sx={{ pl: 2 }}>
+              <Typography variant="body1">Name: {editSellerFormData.name}</Typography>
+              <Typography variant="body1">Role: {editSellerFormData.role ? 'Admin' : 'User'}</Typography>
+              <Typography variant="body1">PhoneNumber: {editSellerFormData.phoneNumber}</Typography>
+              <Typography variant="body1">Email: {editSellerFormData.email}</Typography>
+              <Typography variant="body1">Password: {editSellerFormData.password}</Typography>
+            </Stack>
+            {/* Buttons to submit or cancel */}
+            <Stack direction="row" spacing={2} justifyContent="flex-end" mt={2}>
+              <Button variant="contained" color="primary" onClick={handleEditSeller}>
+                Update Seller
+              </Button>
+              <Button onClick={handleCloseEditSellerModal} variant="outlined">
+                Cancel
+              </Button>
             </Stack>
           </ModalContent>
         </Modal>
