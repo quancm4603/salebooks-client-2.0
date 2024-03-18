@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import PropTypes from 'prop-types';
 
 import Tooltip from '@mui/material/Tooltip';
@@ -11,7 +12,14 @@ import Iconify from 'src/components/iconify';
 
 // ----------------------------------------------------------------------
 
-export default function UserTableToolbar({ numSelected, filterName, onFilterName, onExportToExcel}) {
+export default function ProductTableToolbar({
+  numSelected,
+  filterName,
+  onFilterName,
+  onExportToExcel,
+}) {
+  const [loading] = useState(false);
+
   return (
     <Toolbar
       sx={{
@@ -45,20 +53,24 @@ export default function UserTableToolbar({ numSelected, filterName, onFilterName
         />
       )}
 
-{numSelected > 0 && (
-        <Tooltip title="Export to Excel">
-          <IconButton onClick={onExportToExcel}>
+      {numSelected > 0 ? (
+        <Tooltip title="Export to excel">
+          <IconButton onClick={onExportToExcel} disabled={loading}>
             <Iconify icon="eva-save-fill" />
           </IconButton>
         </Tooltip>
+      ) : (
+        <Tooltip title="Filter list">
+          <IconButton>
+            <Iconify icon="ic:round-filter-list" />
+          </IconButton>
+        </Tooltip>
       )}
-
-      
     </Toolbar>
   );
 }
 
-UserTableToolbar.propTypes = {
+ProductTableToolbar.propTypes = {
   numSelected: PropTypes.number,
   filterName: PropTypes.string,
   onFilterName: PropTypes.func,
