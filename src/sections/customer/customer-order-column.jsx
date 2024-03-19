@@ -7,21 +7,44 @@ import CardActions from '@mui/material/CardActions';
 import CardContent from '@mui/material/CardContent';
 import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
+import { API_BASE_URL } from '../../../config';
+
 
 function CustomerOrderHistory({ customerId }) {
     const [orderHistory, setOrderHistory] = useState([]);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
+    
+
         const fetchOrderHistory = async () => {
             try {
-                const response = await axios.get(`https://localhost:7196/api/Customer/${customerId}/quotations`);
+              const token = localStorage.getItem('jwttoken');
+          
+              // Kiểm tra xem có mã token hay không
+              if (!token) {
+                throw new Error('Không tìm thấy mã token');
+              }
+          
+              // Gửi yêu cầu lấy lịch sử đơn hàng của khách hàng bằng axios
+              const response = await axios.get(`${API_BASE_URL}/api/Customer/${customerId}/quotations`, {
+                headers: {
+                  Authorization: `Bearer ${token}`,
+                },
+              });
+          
+              // Kiểm tra xem yêu cầu có thành công hay không
+              if (response.status === 200) {
                 setOrderHistory(response.data);
                 setLoading(false);
+              } else {
+                console.error('Failed to fetch order history');
+              }
             } catch (error) {
-                console.error('Error fetching order history:', error);
+              console.error('Error fetching order history:', error.message);
             }
-        };
+          };
+          
 
         fetchOrderHistory();
     }, [customerId]);
@@ -56,7 +79,7 @@ function CustomerOrderHistory({ customerId }) {
         <div   >
             {/* <h2>Order History for Customer ID: {customerId}</h2> */}
            
-            <ul style={{ listStyle: 'none', padding: 0, maxHeight: '525px', overflowY: 'auto' }}>
+            <ul style={{ listStyle: 'none', padding: 0, maxHeight: '500px', overflowY: 'auto' }}>
 
                 {orderHistory.map((order, index) => (
                     <li key={index}>

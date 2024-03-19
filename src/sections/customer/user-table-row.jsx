@@ -17,14 +17,17 @@ import Label from 'src/components/label';
 
 import { Button, TextField, Dialog, Grid, DialogActions, DialogContent, DialogContentText, DialogTitle, Select, MenuItem, FormControl, InputLabel } from '@mui/material';
 import CustomerOrderHistory from './customer-order-column'; // Đường dẫn tới component CustomerOrderHistory
-
-/* Nó sử dụng các thành phần của Material-UI để thiết kế và chức năng, bao gồm TableRow, 
-TableCell, Checkbox, IconButton, Popover, và MenuItem. */
+import { API_BASE_URL } from '../../../config';
 
 
-// ----------------------------------------------------------------------
+
+
+// ===========================================================================
+
 /*  định nghĩa một thành phần React có tên là UserTableRow được sử dụng để hiển thị một dòng của bảng chứa thông tin người dùng. */
 
+// Get data from dad component : customerview
+// ===========================================================================
 export default function UserTableRow({
   selected,
   name,
@@ -39,36 +42,70 @@ export default function UserTableRow({
   status,
   handleClick,
   customerId
-
-
 }) {
 
-  const [open, setOpen] = useState(null);
 
+  const [open, setOpen] = useState(null);
   const [openDialog, setOpenDialog] = useState(false);
   const [openDialogDetail, setOpenDialogDetail] = useState(false);
+  const [cities, setCities] = useState([]);
+  const [districts, setDistricts] = useState([]);
+  const [wards, setWards] = useState([]);
 
 
+  
+  // UseEffect Function 
+  // ===========================================================================
+  // useEffect(() => {
+  //   const fetchData = async () => {
+  //     try {
+  //       const response = await axios.get("https://raw.githubusercontent.com/kenzouno1/DiaGioiHanhChinhVN/master/data.json");
+  //       setCities(response.data);
+  //     } catch (error) {
+  //       console.error('Error fetching data:', error);
+  //     }
+  //   };
+  //   fetchData();
+  //   if (customerId != null) {
+  //     fetchTotalOrderValue(customerId);
+  //   }
 
-  const handleCloseMenuEdit = () => {
-    setOpenDialog(false);
-  };
-
-  const handleCloseMenuDetail = () => {
-    setOpenDialogDetail(false);
-  };
+  // }, [customerId, fetchTotalOrderValue]);
 
 
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await axios.get("https://raw.githubusercontent.com/kenzouno1/DiaGioiHanhChinhVN/master/data.json");
+        setCities(response.data);
+      } catch (error) {
+        console.error('Error fetching data:', error);
+      }
+    };
+    fetchData();
+    if (customerId != null) {
+      fetchTotalOrderValue(customerId); // Sử dụng fetchTotalOrderValue trực tiếp ở đây
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [customerId]); 
+  // ===========================================================================
+
+
+  // Function for PopUp Detail and Edit Customer
+  // ===========================================================================
   /* Hàm handleOpenMenu thiết lập phần tử gốc cho menu popover là mục tiêu hiện tại. */
   const handleOpenMenu = (event) => {
     setOpen(event.currentTarget);
   };
-
   /* Hàm handleCloseMenu đóng menu popover. */
   const handleCloseMenu = () => {
     setOpen(null);
   };
+  // ===========================================================================
 
+
+  // Form and Function for Add New Customer
+  // ===========================================================================
   const handleChange = (e) => {
     setFormDataAdd({ ...formDataAdd, [e.target.name]: e.target.value });
   };
@@ -97,7 +134,7 @@ export default function UserTableRow({
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post('https://localhost:7196/api/Customer/AddCustomerX', formDataAdd, {
+      const response = await axios.post(`${API_BASE_URL}/api/Customer/AddCustomerX`, formDataAdd, {
         headers: {
           'Content-Type': 'application/json'
         }
@@ -123,8 +160,6 @@ export default function UserTableRow({
         }
       });
 
-
-
     } catch (error) {
       console.error('Failed to add customer:', error.message);
 
@@ -144,10 +179,69 @@ export default function UserTableRow({
 
     }
   };
+  // ===========================================================================
 
-  const [cities, setCities] = useState([]);
-  const [districts, setDistricts] = useState([]);
-  const [wards, setWards] = useState([]);
+
+// Form and Function for Update Customer
+// ===========================================================================
+
+ const handleSubmitUpdate = async (e) => {
+  e.preventDefault();
+  try {
+    // Đảm bảo rằng bạn đã có mã thông báo truy cập trong phần đầu tiên của mã này.
+    const token = localStorage.getItem('jwttoken');
+
+    const response = await axios.post(`${API_BASE_URL}/api/Customer/UpdateCustomer`, formDataDetail, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      }
+    });
+    console.log('Customer updated successfully:', response.data);
+
+    window.setTimeout(() => {
+      setOpenDialog(false);
+    }, 1000); // 1000 milliseconds = 1 giây
+
+    Swal.fire({
+      title: 'Success',
+      text: 'Customer updated successfully',
+      icon: 'success',
+      timer: 3000, // Thời gian hiển thị thông báo (ms)
+      timerProgressBar: true, // Hiển thị thanh tiến trình
+      showConfirmButton: false // Ẩn nút xác nhận
+    });
+
+  } catch (error) {
+    console.error('Failed to update customer:', error.message);
+
+    window.setTimeout(() => {
+      setOpenDialogDetail(false);
+    }, 1000); // 1000 milliseconds = 1 giây
+
+    Swal.fire({
+      title: "Error",
+      text: "An error occurred while updating customer. Please try again.",
+      icon: "error",
+      timer: 3000, // Thời gian hiển thị thông báo (ms)
+      timerProgressBar: true, // Hiển thị thanh tiến trình
+      showConfirmButton: false // Ẩn nút xác nhận
+    });
+
+  }
+};
+
+const handleChangeUpdate = (e) => {
+  setFormDataDetail({ ...formDataDetail, [e.target.name]: e.target.value });
+};
+
+const handleCloseMenuEdit = () => {
+  setOpenDialog(false);
+};
+
+
+
+// Form and Function for Get Spend of Quarter 
+// ===========================================================================
 
   const getCurrentQuarter = useCallback(() => {
     const now = new Date();
@@ -175,7 +269,7 @@ export default function UserTableRow({
       const { currentYear, quarter } = getCurrentQuarter();
       const token = localStorage.getItem('jwttoken');
 
-      const response = await axios.put(`https://localhost:7196/api/Customer/TotalOrderQuarter?customerId=${customerIdV}&year=${currentYear}&quarter=${quarter}`,
+      const response = await axios.put(`${API_BASE_URL}/api/Customer/TotalOrderQuarter?customerId=${customerIdV}&year=${currentYear}&quarter=${quarter}`,
         {}, // No data to send in the request body
         {
           headers: {
@@ -196,56 +290,14 @@ export default function UserTableRow({
     }
   }, [getCurrentQuarter]);
 
-  // const fetchTotalOrderValue = useCallback(async (customerIdV) => {
-  //   try {
-  //     const { currentYear, quarter } = getCurrentQuarter();
-  //     const token = localStorage.getItem('jwttoken');
-  //     const response = await axios.put(`https://localhost:7196/api/Customer/TotalOrderQuarter?customerId=${customerIdV}&year=${currentYear}&quarter=${quarter}`, {
-  //       headers: {
-  //         Authorization: `Bearer ${token}`,
-  //       },
-  //     });
-
-
-  //     if (response.ok) {
-  //       const data = await response.json();
-  //       console.log(data);
-  //       setTotalOrderValue(data);
-  //     } else {
-  //       console.error('Failed to fetch setCustomers');
-  //     }
-
-
-  //   } catch (error) {
-  //     console.error('Error fetching total order value:', error);
-  //   }
-  // }, [getCurrentQuarter]);
-
-
-
   const fetchTotalOrderValueCallback = useCallback(fetchTotalOrderValue, [fetchTotalOrderValue]);
 
+// ===========================================================================
 
 
 
-
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const response = await axios.get("https://raw.githubusercontent.com/kenzouno1/DiaGioiHanhChinhVN/master/data.json");
-        setCities(response.data);
-      } catch (error) {
-        console.error('Error fetching data:', error);
-      }
-    };
-    fetchData();
-    if (customerId != null) {
-      fetchTotalOrderValue(customerId);
-    }
-
-  }, [customerId, fetchTotalOrderValue]);
-
-
+// Function handle get City District and Ward of Add New Customer
+// ===========================================================================
 
   const handleCityChange = (event) => {
     const selectedCityId = event.target.value;
@@ -261,7 +313,6 @@ export default function UserTableRow({
     }
   };
 
-
   const handleDistrictChange = (event) => {
     const selectedDistrictId = event.target.value;
     const selectedDistrictItem = districts.find(districtItem => districtItem.Id === selectedDistrictId);
@@ -275,7 +326,6 @@ export default function UserTableRow({
     }
   };
 
-
   const handleWardChange = (event) => {
     const selectedWard = event.target.value;
     setFormDataAdd({
@@ -284,8 +334,12 @@ export default function UserTableRow({
     });
   };
 
-  // ====================================================================================
+// =========================================================================
 
+
+
+// Form And Function For Get Data Detail
+// ==========================================================================
   const [formDataDetail, setFormDataDetail] = useState({
     name: '',
     customerType: '',
@@ -307,59 +361,6 @@ export default function UserTableRow({
     customerId: '',
   });
 
-//   try {
-//     const token = localStorage.getItem('jwttoken');
-//     const response = await fetch(`${API_BASE_URL}/api/Quotation/${quotationId}`, {
-//       headers: {
-//         Authorization: `Bearer ${token}`,
-//       },
-//     });
-
-//     if (response.ok) {
-//       const data = await response.json();
-//       return data;
-//     }
-
-//     console.error(`Failed to fetch quotation details for ID ${quotationId}`);
-//   } catch (error) {
-//     console.error('Error fetching quotation details:', error);
-//   }
-
-//   return [];
-// };
-
-  // const handleOpenMenuEdit = async (selectedCustomerId) => {
-  //   try {
-  //    const token = localStorage.getItem('jwttoken');
-  
-  //     // Kiểm tra xem có mã token hay không
-  //     if (!token) {
-  //       throw new Error('Không tìm thấy mã token');
-  //     }
-  
-  
-  
-  //     // Gửi yêu cầu lấy thông tin chi tiết của khách hàng
-  //     const response = await fetch(`https://localhost:7196/api/Customer/DetailCustomer${selectedCustomerId}`,  {
-  //             headers: {
-  //               Authorization: `Bearer ${token}`,
-  //             },
-  //             });
-  
-  //     // Kiểm tra xem yêu cầu có thành công hay không
-  //     if (response.ok) {
-  //             const data = await response.json();
-  //             setFormDataDetail(data);
-  
-  //             // Mở form chỉnh sửa
-  //             setOpenDialog(true);            }
-  
-   
-  //   } catch (error) {
-  //     console.error('Lỗi khi lấy thông tin chi tiết khách hàng:', error.message);
-  //   }
-  // };
-  
   const handleOpenMenuEdit = async (selectedCustomerId) => {
     try {
       const token = localStorage.getItem('jwttoken');
@@ -370,7 +371,7 @@ export default function UserTableRow({
       }
   
       // Gửi yêu cầu lấy thông tin chi tiết của khách hàng bằng axios
-      const response = await axios.get(`https://localhost:7196/api/Customer/DetailCustomer/${selectedCustomerId}`, {
+      const response = await axios.get(`${API_BASE_URL}/api/Customer/DetailCustomer/${selectedCustomerId}`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -389,51 +390,6 @@ export default function UserTableRow({
     }
   };
   
-
-
-  // const handleOpenMenuEdit = async (selectedCustomerId) => { // Thêm async ở đây
-  //   try {
-  //     // Lấy thông tin chi tiết của khách hàng từ API
-  //     const token = localStorage.getItem('jwttoken');
-  //     const response = await fetch(`https://localhost:7196/api/Customer/DetailCustomer${selectedCustomerId}`,
-  //       {}, // No data to send in the request body
-  //       {
-  //         headers: {
-  //           Authorization: `Bearer ${token}`,
-  //         },
-  //       });
-
-  //     if (response.status === 200) { // Check for successful status code
-  //       const data = await response.json();
-  //       console.log(data);
-  //       // Cập nhật formDataDetail với dữ liệu của khách hàng
-  //       setFormDataDetail(data);
-  //       // Mở form chỉnh sửa
-  //       setOpenDialog(true);
-  //     } else {
-  //       console.error('Failed to fetch setCustomers');
-  //     }
-
-  //   } catch (error) {
-  //     console.error('Lỗi khi lấy thông tin chi tiết khách hàng:', error);
-  //   }
-  // };
-
-
-  // const handleOpenMenuDetail = async (selectedCustomerId) => { // Thêm async ở đây
-  //   try {
-  //     // Lấy thông tin chi tiết của khách hàng từ API
-  //     const response = await fetch(`https://localhost:7196/api/Customer/DetailCustomer/${selectedCustomerId}`);
-  //     const data = await response.json();
-  //     // Cập nhật formDataDetail với dữ liệu của khách hàng
-  //     setFormDataDetail(data);
-  //     // Mở form chỉnh sửa
-  //     setOpenDialogDetail(true);
-  //   } catch (error) {
-  //     console.error('Lỗi khi lấy thông tin chi tiết khách hàng:', error);
-  //   }
-  // };
-
   const handleOpenMenuDetail = async (selectedCustomerId) => {
     try {
       const token = localStorage.getItem('jwttoken');
@@ -444,7 +400,7 @@ export default function UserTableRow({
       }
   
       // Gửi yêu cầu lấy thông tin chi tiết của khách hàng bằng axios
-      const response = await axios.get(`https://localhost:7196/api/Customer/DetailCustomer/${selectedCustomerId}`, {
+      const response = await axios.get(`${API_BASE_URL}/api/Customer/DetailCustomer/${selectedCustomerId}`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -463,14 +419,10 @@ export default function UserTableRow({
     }
   };
   
+  const handleCloseMenuDetail = () => {
+    setOpenDialogDetail(false);
+  };
 
-  // TÍNH GIÁ TRỊ ĐƠN HÀNG THEO QUÝ BEGIN
-
-
-
-
-
-  // TÍNH GIÁ TRỊ ĐƠN HÀNG THEO QUÝ END
 
 
   /* Mã JSX render dòng bảng với các ô chứa thông tin người dùng. */
@@ -495,11 +447,9 @@ export default function UserTableRow({
         <TableCell>{email}</TableCell>
         <TableCell>{mobile}</TableCell>
         <TableCell>{province}</TableCell>
-        <TableCell>{totalOrderValue !== null ? totalOrderValue.toFixed(2) : 'Loading...'}</TableCell> {/* Giá trị đơn hàng của quý */}
+        <TableCell>{totalOrderValue !== null ? totalOrderValue.toFixed(2) : 'Loading...'}</TableCell> {/*  */}
+        {/*  */}
         <TableCell>{address}</TableCell>
-
-
-
 
 
         <TableCell align="right">
@@ -530,24 +480,27 @@ export default function UserTableRow({
           Detail
         </MenuItem>
 
-        {/* <MenuItem onClick={handleCloseMenu} sx={{ color: 'error.main' }}>
-            <Iconify icon="eva:trash-2-outline" sx={{ mr: 2 }} />
-            Delete
-          </MenuItem> */}
       </Popover>
 
-      <Dialog open={openDialog} onClose={handleCloseMenuEdit}>
-        <form onSubmit={handleSubmit}>
-          <DialogTitle> Update Customer</DialogTitle>
-          <DialogContent>
-            <DialogContentText>
-              Please fill information to update customer information
-            </DialogContentText>
+      {/* // Form Edit For Customer
+      // =========================================================================== */}
 
+
+      
+      <Dialog
+        open={openDialog}
+        onClose={handleCloseMenuEdit}
+        PaperProps={{ style: { width: '1000px', maxWidth: '90vw' } }} >
+
+        <form onSubmit={handleSubmitUpdate}>
+          <DialogTitle style={{ maxHeight: '4vw' }} > <h2>UPDATE CUSTOMER</h2> </DialogTitle>
+
+          <DialogContent style={{ margin: 0 }} >
+           
             <Grid container spacing={3}>
               <Grid item xs={6}>
                 <Grid container spacing={2} direction="column">
-                  <Grid item>
+                <Grid item style={{ maxHeight: '4vw' }}  >
                     <h3>Customer Information</h3>
                   </Grid>
                   <Grid item>
@@ -557,8 +510,7 @@ export default function UserTableRow({
                       id="name"
                       name="name"
                       value={formDataDetail.name}
-                      onChange={handleChange}
-
+                      onChange={handleChangeUpdate}
                       fullWidth
                     />
                   </Grid>
@@ -569,7 +521,7 @@ export default function UserTableRow({
                       id="companyName"
                       name="companyName"
                       value={formDataDetail.companyName}
-                      onChange={handleChange}
+                      onChange={handleChangeUpdate}
 
                       fullWidth
                     />
@@ -581,7 +533,7 @@ export default function UserTableRow({
                       id="taxID"
                       name="taxID"
                       value={formDataDetail.taxID}
-                      onChange={handleChange}
+                      onChange={handleChangeUpdate}
 
                       fullWidth
                     />
@@ -593,7 +545,7 @@ export default function UserTableRow({
                       id="mobile"
                       name="mobile"
                       value={formDataDetail.mobile}
-                      onChange={handleChange}
+                      onChange={handleChangeUpdate}
 
                       fullWidth
                     />
@@ -605,7 +557,7 @@ export default function UserTableRow({
                       id="email"
                       name="email"
                       value={formDataDetail.email}
-                      onChange={handleChange}
+                      onChange={handleChangeUpdate}
 
                       fullWidth
                     />
@@ -617,7 +569,7 @@ export default function UserTableRow({
                       id="tags"
                       name="tags"
                       value={formDataDetail.tags}
-                      onChange={handleChange}
+                      onChange={handleChangeUpdate}
 
                       fullWidth
                     />
@@ -630,7 +582,7 @@ export default function UserTableRow({
                       id="website"
                       name="website"
                       value={formDataDetail.website}
-                      onChange={handleChange}
+                      onChange={handleChangeUpdate}
 
                       fullWidth
                     />
@@ -640,7 +592,7 @@ export default function UserTableRow({
               </Grid>
               <Grid item xs={6}>
                 <Grid container spacing={2} direction="column">
-                  <Grid item>
+                <Grid item style={{ maxHeight: '4vw' }}  >
                     <h3>Customer Address</h3>
                   </Grid>
                   <Grid item>
@@ -697,7 +649,7 @@ export default function UserTableRow({
                       id="address"
                       name="address"
                       value={formDataDetail.address}
-                      onChange={handleChange}
+                      onChange={handleChangeUpdate}
 
                       fullWidth
                     />
@@ -710,34 +662,57 @@ export default function UserTableRow({
                       id="internalNotes"
                       name="internalNotes"
                       value={formDataDetail.internalNotes}
-                      onChange={handleChange}
+                      onChange={handleChangeUpdate}
 
                       fullWidth
                     />
                   </Grid>
+
+                  <Grid item>
+                  <DialogActions>
+                    {/* <Button onClick={handleClose}>Cancel</Button> */}
+                    <Button variant="contained" onClick={handleCloseMenuEdit} color="error" size="medium" >
+                      Cancel
+                    </Button>
+
+                    {/* <Button type="submit">Add New Customer</Button> */}
+                    <Button variant="contained" type="submit" color="success" size="medium">
+                      Update Customer
+                    </Button>
+                  </DialogActions>
+                  </Grid>
+
+
                 </Grid>
               </Grid>
             </Grid>
           </DialogContent>
 
-          <DialogActions>
-            <Button onClick={handleCloseMenuEdit}>Cancel</Button>
-            <Button type="submit">Update Customer</Button>
-          </DialogActions>
+         
         </form>
       </Dialog>
 
+      {/* // =========================================================================== */}
 
-      <Dialog open={openDialogDetail} onClose={handleCloseMenuDetail} PaperProps={{ style: { width: '1000px', maxWidth: '90vw' } }} >
+
+
+
+
+      {/* // Form Detail Customer
+      // ===========================================================================  */}
+
+      <Dialog open={openDialogDetail} onClose={handleCloseMenuDetail} PaperProps={{ style: { width: '1000px', maxWidth: '90vw', maxHeight: '90vh'  } }} >
         <form onSubmit={handleSubmit}>
-          <DialogTitle>Customer Detail</DialogTitle>
+          
+          <DialogTitle style={{ maxHeight: '4vw', marginTop: 0 }} > <h2>CUSTOMER DETAIL</h2> </DialogTitle>
+
           <DialogContent>
 
 
             <Grid container spacing={3}>
               <Grid item xs={4}>
                 <Grid container spacing={2} direction="column">
-                  <Grid item>
+                <Grid item style={{ maxHeight: '4vw' }}  >
                     <h3>Customer Information</h3>
                   </Grid>
                   <Grid item>
@@ -838,7 +813,7 @@ export default function UserTableRow({
 
               <Grid item xs={4}>
                 <Grid container spacing={2} direction="column">
-                  <Grid item>
+                <Grid item style={{ maxHeight: '4vw' }}  >
                     <h3>Customer Address</h3>
                   </Grid>
                   <Grid item>
@@ -922,7 +897,7 @@ export default function UserTableRow({
 
               <Grid item xs={4}>
                 <Grid container spacing={2} direction="column">
-                  <Grid item>
+                <Grid item style={{ maxHeight: '4vw' }}  >
                     <h3>Customer Order History</h3>
                     <CustomerOrderHistory customerId={customerId} />
                   </Grid>
@@ -933,10 +908,15 @@ export default function UserTableRow({
           </DialogContent>
 
           <DialogActions>
-            <Button onClick={handleCloseMenuDetail}>Cancel</Button>
+            <Button variant="contained" onClick={handleCloseMenuDetail} color="error" size="medium" >
+                      Cancel
+                    </Button>
           </DialogActions>
         </form>
       </Dialog>
+
+      {/* // =========================================================================== */}
+
     </>
 
 
