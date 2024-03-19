@@ -2,7 +2,6 @@ import PropTypes from 'prop-types';
 import React, { useState, useEffect } from 'react';
 
 import Box from '@mui/material/Box';
-import Avatar from '@mui/material/Avatar';
 import Dialog from '@mui/material/Dialog';
 import Button from '@mui/material/Button';
 import TextField from '@mui/material/TextField';
@@ -157,6 +156,7 @@ export default function EditProductDialog({
     setLoading(false);
   };
 
+  /*
   const handleFileChange = (e) => {
     const files = Array.from(e.target.files);
     const urls = files.map((file) => URL.createObjectURL(file));
@@ -167,6 +167,7 @@ export default function EditProductDialog({
     const updatedImages = product.imageUrls.filter((_, i) => i !== index);
     setProduct({ ...product, imageUrls: updatedImages });
   };
+  */
 
   return (
     <>
@@ -261,30 +262,6 @@ export default function EditProductDialog({
               handleChange({ target: { name: 'tax', value: input } });
             }}
           />
-          <Button component="label" variant="contained">
-            Upload Images
-            <input
-              type="file"
-              accept="image/*"
-              multiple
-              style={{ display: 'none' }}
-              onChange={handleFileChange}
-            />
-          </Button>
-          <Box display="flex" flexWrap="wrap">
-            {product.imageUrls.map((url, index) => (
-              <Box key={index} sx={{ position: 'relative', m: 1 }}>
-                <Avatar alt={`Product ${index + 1}`} src={url} sx={{ width: 100, height: 100 }} />
-                <IconButton
-                  onClick={() => removeImage(index)}
-                  size="small"
-                  sx={{ position: 'absolute', top: 0, right: 0, bgcolor: 'background.paper' }}
-                >
-                  <Iconify icon="bi:trash" />
-                </IconButton>
-              </Box>
-            ))}
-          </Box>
           <TextField
             margin="normal"
             label="Note"

@@ -2,7 +2,6 @@ import { lazy, Suspense, useEffect, useState } from 'react';
 import { Outlet, Navigate, useRoutes } from 'react-router-dom';
 import DashboardLayout from 'src/layouts/dashboard';
 import LoginView from 'src/sections/login/login-view';
-import FirebaseImageUpload from 'src/utils/FirebaseImageUpload';
 
 import { API_BASE_URL } from '../../config';
 
@@ -135,10 +134,6 @@ export default function Router() {
     {
       path: '*',
       element: <Navigate to="/404" replace />,
-    },
-    {
-      path: '/upload',
-      element: <FirebaseImageUpload/>,
     },
   ]);
 
