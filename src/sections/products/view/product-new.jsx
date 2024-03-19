@@ -2,7 +2,6 @@ import PropTypes from 'prop-types';
 import React, { useState, useEffect } from 'react';
 
 import Box from '@mui/material/Box';
-import Avatar from '@mui/material/Avatar';
 import Dialog from '@mui/material/Dialog';
 import Button from '@mui/material/Button';
 import TextField from '@mui/material/TextField';
@@ -12,12 +11,6 @@ import Autocomplete from '@mui/material/Autocomplete';
 import DialogContent from '@mui/material/DialogContent';
 import DialogActions from '@mui/material/DialogActions';
 import CircularProgress from '@mui/material/CircularProgress';
-// Firebase storage configuration
-import { imageDb } from '../../../utils/Config';
-
-// Firebase storage functions
-import { ref, getDownloadURL, listAll, uploadBytes } from 'firebase/storage';
-import { v4 } from 'uuid';
 
 import Iconify from 'src/components/iconify';
 
@@ -70,6 +63,7 @@ export default function AddProductDialog({ open, onClose, onAddProduct }) {
     setProduct({ ...product, [name]: value });
   };
 
+  /*
   const handleFileChange = (e) => {
     const files = Array.from(e.target.files);
     const urls = files.map((file) => URL.createObjectURL(file));
@@ -80,25 +74,9 @@ export default function AddProductDialog({ open, onClose, onAddProduct }) {
     const updatedImages = product.imageUrls.filter((_, i) => i !== index);
     setProduct({ ...product, imageUrls: updatedImages });
   };
+  */
 
   const handleAddProduct = async () => {
-    if (product.imageUrls.length > 0) {
-      // Assuming img is not used in your component and you want to upload all images in imageUrls
-      const promises = product.imageUrls.map((img) => {
-        const imgRef = ref(imageDb, `files/${v4()}`);
-        return uploadBytes(imgRef, img).then((value) => {
-          return getDownloadURL(value.ref);
-        });
-      });
-
-      Promise.all(promises)
-        .then((urls) => {
-          setProduct((prevProduct) => ({ ...prevProduct, imageUrls: [...prevProduct.imageUrls, ...urls] }));
-        })
-        .catch((error) => {
-          console.error('Error uploading images:', error);
-        });
-    }
 
     const taxRegex = /^\d+(\.\d{1,2})?$/;
 
@@ -261,30 +239,6 @@ export default function AddProductDialog({ open, onClose, onAddProduct }) {
               handleChange({ target: { name: 'tax', value: input } });
             }}
           />
-          <Button component="label" variant="contained">
-            Upload Images
-            <input
-              type="file"
-              accept="image/*"
-              multiple
-              style={{ display: 'none' }}
-              onChange={handleFileChange}
-            />
-          </Button>
-          <Box display="flex" flexWrap="wrap">
-            {product.imageUrls.map((url, index) => (
-              <Box key={index} sx={{ position: 'relative', m: 1 }}>
-                <Avatar alt={`Product ${index + 1}`} src={url} sx={{ width: 100, height: 100 }} />
-                <IconButton
-                  onClick={() => removeImage(index)}
-                  size="small"
-                  sx={{ position: 'absolute', top: 0, right: 0, bgcolor: 'background.paper' }}
-                >
-                  <Iconify icon="bi:trash" />
-                </IconButton>
-              </Box>
-            ))}
-          </Box>
           <TextField
             margin="normal"
             label="Note"
