@@ -76,10 +76,10 @@ export default function QuotationsView() {
                     console.log(data);
                     setQuotations(data);
                 } else {
-                    console.error('Failed to fetch quotations');
+                    console.error('Failed to fetch Order');
                 }
             } catch (error) {
-                console.error('Error fetching quotations:', error);
+                console.error('Error fetching Order:', error);
             }
         };
 
@@ -208,22 +208,22 @@ export default function QuotationsView() {
                 console.log(data);
                 setQuotations(data);
             } else {
-                console.error('Failed to fetch quotations');
+                console.error('Failed to fetch Order');
             }
         } catch (error) {
-            console.error('Error fetching quotations:', error);
+            console.error('Error fetching Order:', error);
         }
     };
 
     // Create quotation
     const handleCreateQuotation = async () => {
         if (!newQuotation.customerId || !newQuotation.products.some(product => product.productId)) {
-            console.error('Invalid quotation. CustomerId and at least one product are required.');
+            console.error('Invalid Order. CustomerId and at least one product are required.');
             setOpenCreateDialog(false);
             Swal.fire({
                 icon: "error",
                 title: "Oops...",
-                text: "Invalid quotation!",
+                text: "Invalid Order!",
             });
             return;
         }
@@ -239,7 +239,7 @@ export default function QuotationsView() {
         });
 
         if (hasDuplicates) {
-            console.error('Invalid quotation. Duplicate products are not allowed.');
+            console.error('Invalid Order. Duplicate products are not allowed.');
             setOpenCreateDialog(false);
             Swal.fire({
                 icon: "error",
@@ -270,21 +270,21 @@ export default function QuotationsView() {
                 setOpenCreateDialog(false);
                 Swal.fire({
                     title: "Added!",
-                    text: "Addquotation successfully!",
+                    text: "AddOrder successfully!",
                     icon: "success"
                 });
             } else {
                 const errorText = await response.text();
-                console.error('Failed to create quotation:', errorText);
+                console.error('Failed to create Order:', errorText);
                 setOpenCreateDialog(false);
                 Swal.fire({
                     icon: "error",
                     title: "Oops...",
-                    text: "Failed to create quotation!",
+                    text: "Failed to create Order!",
                 });
             }
         } catch (error) {
-            console.error('Error creating quotation:', error);
+            console.error('Error creating Order:', error);
         }
 
         setNewQuotation({
@@ -399,14 +399,14 @@ export default function QuotationsView() {
 
                     allData.push(quotationData, ...detailsData);
                 } else {
-                    console.error(`Failed to fetch quotation details for ID ${quotationId}`);
+                    console.error(`Failed to fetch Order details for ID ${quotationId}`);
                 }
             })
         );
 
         const ws = XLSX.utils.json_to_sheet(allData);
-        XLSX.utils.book_append_sheet(wb, ws, 'Quotations_With_Details');
-        XLSX.writeFile(wb, 'selected_quotations_with_details.xlsx');
+        XLSX.utils.book_append_sheet(wb, ws, 'Order_With_Details');
+        XLSX.writeFile(wb, 'selected_Order_with_details.xlsx');
     };
 
     const fetchQuotationDetails = async (quotationId) => {
@@ -423,9 +423,9 @@ export default function QuotationsView() {
                 return data;
             }
 
-            console.error(`Failed to fetch quotation details for ID ${quotationId}`);
+            console.error(`Failed to fetch Order details for ID ${quotationId}`);
         } catch (error) {
-            console.error('Error fetching quotation details:', error);
+            console.error('Error fetching Order details:', error);
         }
 
         return [];
