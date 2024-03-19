@@ -59,34 +59,7 @@ export default function ProductDetailDialog({ open, onClose, productId }) {
     <Dialog open={open} onClose={onClose} fullWidth maxWidth="md">
       <DialogTitle>Product Details</DialogTitle>
       <DialogContent style={{ display: 'flex' }}>
-        <div style={{ flex: 1, marginRight: 10 }}>
-          <div style={{ display: 'flex', flexDirection: 'row', overflowX: 'auto' }}>
-            {productDetails?.imageUrls.map((imageUrl, index) => (
-              <img
-                key={index}
-                src={
-                  imageUrl ||
-                  'https://scontent.fsgn2-7.fna.fbcdn.net/v/t1.15752-9/430854051_3569145256631762_695375072275222205_n.jpg?_nc_cat=108&ccb=1-7&_nc_sid=5f2048&_nc_ohc=6riD3q6WO9gAX-mMJM_&_nc_oc=AQlgwn7LYnzIVqUkmhm9YSdQVgDjsvygGRfa4Q6mzMlduPLd5sv0ws7qMP06XzvApQc&_nc_ht=scontent.fsgn2-7.fna&oh=03_AdRKs53PeBPhYq_hGkGgyjgexb2mMaDI4LEPV2hzJ4MlZA&oe=66171F1F'
-                } // Provide a placeholder URL here
-                alt=""
-                style={{ width: 200, height: 200, marginRight: 10 }}
-                onError={(e) => {
-                  e.target.onerror = null; // Prevent infinite loop
-                  e.target.src =
-                    'https://scontent.fsgn2-7.fna.fbcdn.net/v/t1.15752-9/430854051_3569145256631762_695375072275222205_n.jpg?_nc_cat=108&ccb=1-7&_nc_sid=5f2048&_nc_ohc=6riD3q6WO9gAX-mMJM_&_nc_oc=AQlgwn7LYnzIVqUkmhm9YSdQVgDjsvygGRfa4Q6mzMlduPLd5sv0ws7qMP06XzvApQc&_nc_ht=scontent.fsgn2-7.fna&oh=03_AdRKs53PeBPhYq_hGkGgyjgexb2mMaDI4LEPV2hzJ4MlZA&oe=66171F1F'; // Fallback to placeholder if image fails to load
-                }}
-              />
-            ))}
-            {(!productDetails || productDetails.imageUrls.length === 0) && (
-              <img
-                src="https://scontent.fsgn2-7.fna.fbcdn.net/v/t1.15752-9/430854051_3569145256631762_695375072275222205_n.jpg?_nc_cat=108&ccb=1-7&_nc_sid=5f2048&_nc_ohc=6riD3q6WO9gAX-mMJM_&_nc_oc=AQlgwn7LYnzIVqUkmhm9YSdQVgDjsvygGRfa4Q6mzMlduPLd5sv0ws7qMP06XzvApQc&_nc_ht=scontent.fsgn2-7.fna&oh=03_AdRKs53PeBPhYq_hGkGgyjgexb2mMaDI4LEPV2hzJ4MlZA&oe=66171F1F" // Placeholder for no images
-                alt=""
-                style={{ width: 200, height: 200, marginRight: 10 }}
-              />
-            )}
-          </div>
-        </div>
-        <div style={{ flex: 1, marginLeft: 10 }}>
+        <div>
           {productDetails && (
             <>
               <TextField

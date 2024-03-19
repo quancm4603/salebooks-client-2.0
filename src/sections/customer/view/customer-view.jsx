@@ -23,6 +23,7 @@ import TableEmptyRows from '../table-empty-rows';
 import UserTableToolbar from '../user-table-toolbar';
 import { emptyRows, applyFilter, getComparator } from '../utils';
 
+
 export default function UserPage() {
   const [page, setPage] = useState(0);
   const [order, setOrder] = useState('asc');
@@ -32,12 +33,18 @@ export default function UserPage() {
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [customers, setCustomers] = useState([]); // State để lưu trữ dữ liệu khách hàng từ API
 
-  useEffect(() => {
-    // Gọi API khi component được render
-    fetchCustomers();
-    
-  }, []);
 
+  // USEEFFECT()
+  // ===========================================================================
+  useEffect(() => {
+    // Call customer data
+    fetchCustomers();
+  }, []);
+  // ===========================================================================
+
+
+  // FetchCustomers() : Get data customer throught api BE 
+  // ===========================================================================
   const fetchCustomers = async () => {
     try {
       const token = localStorage.getItem('jwttoken');
@@ -57,40 +64,11 @@ export default function UserPage() {
       console.error('Error fetching setCustomers:', error);
     }
   }
+  // ===========================================================================
 
 
-  // const fetchCustomers = async () => {
-  //   try {
-  //     const token = localStorage.getItem('jwttoken');
-  //     const response = await axios.get('https://localhost:7196/api/Customer/GetCustomer',{
-  //       headers: {
-  //         Authorization: `Bearer ${token}`,
-  //       }, 
-  //     });
-  //     if (response.ok) {
-  //       const data = await response.json();
-  //       console.log(data);
-  //       setCustomers(response.data); // Lưu trữ dữ liệu khách hàng từ API vào state
-
-  //     } else {
-  //       console.error('Failed to fetch customer');
-  //     }
-      
-  //   } catch (error) {
-  //     console.error('Error fetching customers:', error);
-  //   }
-  // };
-
-  // const fetchCustomers = async () => {
-  //   try {
-  //     const response = await axios.get('https://localhost:7196/api/Customer/GetCustomer');
-  //     setCustomers(response.data); // Lưu trữ dữ liệu khách hàng từ API vào state
-  //   } catch (error) {
-  //     console.error('Error fetching customers:', error);
-  //   }
-  // };
-
-
+  // handleSort() : Sort the id selected
+  // ===========================================================================
   const handleSort = (event, id) => {
     const isAsc = orderBy === id && order === 'asc';
     if (id !== '') {
@@ -98,7 +76,10 @@ export default function UserPage() {
       setOrderBy(id);
     }
   };
+  // ===========================================================================
 
+  // handleSelectAllClick() : Handle click select all
+  // ===========================================================================
   const handleSelectAllClick = (event) => {
     if (event.target.checked) {
       const newSelecteds = customers.map((n) => n.name);
@@ -107,9 +88,11 @@ export default function UserPage() {
     }
     setSelected([]);
   };
+  // ===========================================================================
 
 
-
+  // Handle click on row
+  // ===========================================================================
   const handleClick = (event, id) => {
     const selectedIndex = selected.indexOf(id);
     let newSelected = [];
@@ -127,7 +110,10 @@ export default function UserPage() {
     }
     setSelected(newSelected);
   };
+  // ===========================================================================
 
+  // Paging 
+  // ===========================================================================
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
   };
@@ -136,8 +122,11 @@ export default function UserPage() {
     setPage(0);
     setRowsPerPage(parseInt(event.target.value, 10));
   };
+  // ===========================================================================
 
-  const handleFilterByName = (event) => {
+  // Search Engine
+  // ===========================================================================
+  const handleFilterByName_Mobile_Company_Email_District_Address = (event) => {
     setPage(0);
     setFilterName(event.target.value);
   };
@@ -146,6 +135,7 @@ export default function UserPage() {
     inputData: customers,
     comparator: getComparator(order, orderBy),
     filterName,
+    // filterMobile
   });
 
   const notFound = !dataFiltered.length && !!filterName;
@@ -161,7 +151,7 @@ export default function UserPage() {
         <UserTableToolbar
           numSelected={selected.length}
           filterName={filterName}
-          onFilterName={handleFilterByName}
+          onFilterName={handleFilterByName_Mobile_Company_Email_District_Address}
         />
         <Scrollbar>
           <TableContainer sx={{ overflow: 'unset' }}>

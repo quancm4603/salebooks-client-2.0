@@ -28,6 +28,7 @@ import Label from 'src/components/label';
 import Iconify from 'src/components/iconify';
 
 import Paper from '@mui/material/Paper';
+import CircularProgress from '@mui/material/CircularProgress';
 
 import { API_BASE_URL } from '../../../config';
 
@@ -43,13 +44,17 @@ export default function QuotationTableRow({
   status,
   handleClick,
   updateQuotationStatus,
+  fetchQuotations,
 }) {
   const [anchorEl, setAnchorEl] = useState(null);
 
   const navigate = useNavigate();
 
+  const [openSendDialog, setOpenSendDialog] = useState(false);
   const [openCancelDialog, setOpenCancelDialog] = useState(false);
   const [openConfirmDialog, setOpenConfirmDialog] = useState(false);
+
+  const [loading, setLoading] = useState(false);
 
   const [currentQuotationDetails, setCurrentQuotationDetails] = useState(null);
   const [openDetailDialog, setOpenDetailDialog] = useState(false);
@@ -63,6 +68,16 @@ export default function QuotationTableRow({
 
   const handleCloseDetailDialog = () => {
     setOpenDetailDialog(false);
+    handleCloseMenu();
+  };
+
+ // Send
+  const handleOpenSendDialog = () => {
+    setOpenSendDialog(true);
+  };
+
+  const handleCloseSendDialog = () => {
+    setOpenSendDialog(false);
     handleCloseMenu();
   };
 
@@ -107,26 +122,27 @@ export default function QuotationTableRow({
       });
 
       if (response.ok) {
-        console.log('Quotation confirmed successfully.');
+        console.log('Orders confirmed successfully.');
         updateQuotationStatus(num, 'Fully Invoice');
+        fetchQuotations();
         handleCloseConfirmDialog();
         handleCloseMenu();
         Swal.fire({
           title: "Confirmed!",
-          text: "Confirm quotation successfully!",
+          text: "Confirm Orders successfully!",
           icon: "success"
         });
       } else {
-        console.error('Failed to confirm quotation.');
+        console.error('Failed to confirm Orders.');
         handleCloseMenu();
         Swal.fire({
           icon: 'error',
           title: 'Failed!',
-          text: 'Failed to confirm quotation!',
+          text: 'Failed to confirm Orders!',
         });
       }
     } catch (error) {
-      console.error('Error confirming quotation:', error);
+      console.error('Error confirming Orders:', error);
     }
   };
 
@@ -142,33 +158,34 @@ export default function QuotationTableRow({
       });
 
       if (response.ok) {
-        console.log('Quotation canceled successfully.');
+        console.log('Orders canceled successfully.');
         updateQuotationStatus(num, 'Cancelled');
+        fetchQuotations();
         handleCloseCancelDialog();
         handleCloseMenu();
         Swal.fire({
           title: "Canceled!",
-          text: "Cancel quotation successfully!",
+          text: "Cancel Orders successfully!",
           icon: "success"
         });
       } else {
-        console.error('Failed to cancel quotation.');
+        console.error('Failed to cancel Orders.');
         handleCloseMenu();
         Swal.fire({
           icon: 'error',
           title: 'Failed!',
-          text: 'Failed to cancel quotation!',
+          text: 'Failed to cancel Orders!',
         });
       }
     } catch (error) {
-      console.error('Error canceling quotation:', error);
+      console.error('Error canceling Orders:', error);
     }
   };
 
   const fetchQuotationDetails = async (quotationId) => {
     try {
       const token = localStorage.getItem('jwttoken');
-      const response = await fetch(`${API_BASE_URL}/api/Quotation/${quotationId}`, {
+      const response = await fetch(`${API_BASE_URL}/api/Orders/{id}`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -181,17 +198,57 @@ export default function QuotationTableRow({
         const totalAmount = data.reduce((acc, detail) => acc + detail.subTotal, 0);
         setTotal(totalAmount);
       } else {
-        console.error('Failed to fetch quotation details');
+        console.error('Failed to fetch Orders details');
       }
     } catch (error) {
-      console.error('Error fetching quotation details:', error);
+      console.error('Error fetching Orders details:', error);
       throw error; // Rethrow the error to handle it in the calling function
+    }
+  };
+
+  const handleSendQuotation = async (num) => {
+    try {
+      setLoading(true);
+      const token = localStorage.getItem('jwttoken');
+      const response = await fetch(`${API_BASE_URL}/api/Orders/${num}/SendOrderEmail`, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          quotationId: num,
+        }),
+      });
+
+      if (response.ok) {
+        console.log('Orders email sent successfully.');
+        setLoading(false);
+        handleCloseSendDialog();
+        handleCloseMenu();
+        Swal.fire({
+          title: 'Email Sent!',
+          text: 'Orders email sent successfully!',
+          icon: 'success',
+        });
+      } else {
+        console.error('Failed to send Orders email.');
+        handleCloseSendDialog();
+        handleCloseMenu();
+        Swal.fire({
+          icon: 'error',
+          title: 'Failed!',
+          text: 'Failed to send Orders email!',
+        });
+      }
+    } catch (error) {
+      console.error('Error sending Orders email:', error);
     }
   };
 
   const getStatusColor = (s) => {
     switch (status) {
-      case 'Quotation':
+      case 'Orders':
         return 'primary';
       case 'To Invoice':
         return 'warning';
@@ -239,7 +296,7 @@ export default function QuotationTableRow({
 
         <TableCell>{formatCreatedAt(createAt)}</TableCell>
 
-        <TableCell>{price}VNĐ</TableCell>
+        <TableCell>{price.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}</TableCell>
 
         <TableCell align="right">
           <IconButton onClick={handleOpenMenu}>
@@ -265,7 +322,7 @@ export default function QuotationTableRow({
         </MenuItem>
 
         <Dialog open={openDetailDialog} onClose={handleCloseDetailDialog}>
-          <DialogTitle>Quotation Detail</DialogTitle>
+          <DialogTitle>Orders Detail</DialogTitle>
           <DialogContent>
             {currentQuotationDetails && (
               <>
@@ -330,11 +387,36 @@ export default function QuotationTableRow({
         </Dialog>
 
         {status === 'To Invoice' && (
-          <MenuItem onClick={handleCloseMenu} sx={{ color: 'primary.main' }}>
+          <MenuItem onClick={handleOpenSendDialog} sx={{ color: 'primary.main' }}>
             <Iconify icon="eva-navigation-2-fill" sx={{ mr: 2 }} />
             Send
           </MenuItem>
         )}
+
+        <Dialog open={openSendDialog} onClose={handleCloseSendDialog}>
+          <DialogTitle>Send</DialogTitle>
+          <DialogContent>Are you sure you want to send this Orders?</DialogContent>
+          <DialogActions>
+            <Button onClick={handleCloseSendDialog} variant="outlined" color="primary">
+              Leave
+            </Button>
+            <Button onClick={() => handleSendQuotation(id)} variant="contained" color="primary" disabled={loading}>
+              {loading && (
+                <CircularProgress
+                  size={24}
+                  sx={{
+                    position: 'absolute',
+                    left: '50%',
+                    top: '50%',
+                    marginLeft: '-12px',
+                    marginTop: '-12px',
+                  }}
+                />
+              )}
+              Send
+            </Button>
+          </DialogActions>
+        </Dialog>
 
         {status === 'To Invoice' && (
           <MenuItem onClick={handleOpenCancelDialog} sx={{ color: 'error.main' }}>
@@ -345,7 +427,7 @@ export default function QuotationTableRow({
 
         <Dialog open={openCancelDialog} onClose={handleCloseCancelDialog}>
           <DialogTitle>Cancel</DialogTitle>
-          <DialogContent>Are you sure you want to cancel this quotation?</DialogContent>
+          <DialogContent>Are you sure you want to cancel this Orders?</DialogContent>
           <DialogActions>
             <Button onClick={handleCloseCancelDialog} variant="outlined" color="primary">
               Leave
@@ -371,6 +453,7 @@ QuotationTableRow.propTypes = {
   status: PropTypes.string,
   handleClick: PropTypes.func,
   updateQuotationStatus: PropTypes.func,
+  fetchQuotations: PropTypes.func,
 };
 
 function formatCreatedAt(createdAt) {
