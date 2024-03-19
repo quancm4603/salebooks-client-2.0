@@ -1,24 +1,12 @@
-import { useNavigate } from 'react-router-dom';
-import React, { useState, useEffect, useRef } from 'react';
-import { faker } from '@faker-js/faker';
+import React, { useState, useEffect } from 'react';
 
 import Container from '@mui/material/Container';
 import Grid from '@mui/material/Unstable_Grid2';
-import Typography from '@mui/material/Typography';
 
-import Iconify from 'src/components/iconify';
-
-import AppTasks from '../app-tasks';
-import AppNewsUpdate from '../app-news-update';
-import AppOrderTimeline from '../app-order-timeline';
+import { API_BASE_URL } from '../../../../config';
 import AppCurrentVisits from '../app-current-visits';
 import AppWebsiteVisits from '../app-website-visits';
 import AppWidgetSummary from '../app-widget-summary';
-import AppTrafficBySite from '../app-traffic-by-site';
-import AppCurrentSubject from '../app-current-subject';
-import AppConversionRates from '../app-conversion-rates';
-
-import { API_BASE_URL } from '../../../../config';
 
 // ----------------------------------------------------------------------
 
@@ -88,13 +76,49 @@ export default function AppView() {
 
   const cancelledQuotationsByMonth = countCancelledQuotationsByMonth();
 
+  const countUsers = async () => {
+    try {
+      const token = localStorage.getItem('jwttoken');
+      const response = await fetch(`${API_BASE_URL}/api/Seller/GetSellers`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      if (response.ok) {
+        const data = await response.json();
+        return data.length; // Return the length of the data array
+      } 
+        console.error('Failed to fetch users');
+        return 0; // Return 0 if fetching fails
+      
+    } catch (error) {
+      console.error('Error fetching users:', error);
+      return 0; // Return 0 if an error occurs
+    }
+  };
+  
+  // Usage in the component
+  const [userCount, setUserCount] = useState(0);
+  
+  useEffect(() => {
+    const fetchUserCount = async () => {
+      const count = await countUsers();
+      setUserCount(count);
+    };
+  
+    fetchUserCount();
+  }, []);
+
+  
+  
+
   return (
     <Container maxWidth="xl">
       <Grid container spacing={3}>
         <Grid xs={12} sm={6} md={3}>
           <AppWidgetSummary
-            title="New Users"
-            total={1352831}
+            title="Total Users"
+            total={userCount}
             color="info"
             icon={<img alt="icon" src="/assets/icons/glass/ic_glass_users.png" />}
           />
