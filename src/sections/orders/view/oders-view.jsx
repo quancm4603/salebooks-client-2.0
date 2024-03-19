@@ -305,8 +305,9 @@ export default function QuotationsView() {
 
     const calculateSubtotal = (productId, quantity) => {
         const productPrice = getProductPriceById(productId);
-        return quantity * productPrice;
-    };
+        const subtotal = quantity * productPrice;
+        return subtotal.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' });
+      };
 
     const getProductPriceById = (productId) => {
         const foundProduct = products.find((productOption) => productOption.id === productId);
@@ -344,21 +345,27 @@ export default function QuotationsView() {
     };
 
     // Total in quotationdetail
-    const calculateTotal = () =>
-        newQuotation.products.reduce((qtotal, product) => {
+    const calculateTotal = () => {
+        const totall = newQuotation.products.reduce((qtotal, product) => {
             const price = getProductPriceById(product.productId);
             const subtotal = price * product.quantity;
             return qtotal + subtotal;
         }, 0);
 
+        return totall.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' });
+    };
+
     // Total in quotationdetail including tax
-    const calculateTotalWithTax = () =>
-        newQuotation.products.reduce((qtotal, product) => {
+    const calculateTotalWithTax = () => {
+        const totall = newQuotation.products.reduce((qtotal, product) => {
             const price = getProductPriceById(product.productId);
             const productTax = getProductTaxById(product.productId);
             const subtotal = (price * (1 + productTax)) * product.quantity;
             return qtotal + subtotal;
         }, 0);
+
+        return totall.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' });
+    };
 
     const getProductTaxById = (productId) => {
         const foundProduct = products.find((productOption) => productOption.id === productId);
@@ -474,6 +481,7 @@ export default function QuotationsView() {
                                             updateQuotationStatus={updateQuotationStatus}
                                             selected={selected.indexOf(row.id) !== -1}
                                             handleClick={(event) => handleClick(event, row.id)}
+                                            fetchQuotations={fetchQuotations}
                                         />
                                     ))}
 
@@ -554,7 +562,7 @@ export default function QuotationsView() {
                                             />
                                         </TableCell>
 
-                                        <TableCell>{`${getProductPriceById(product.productId)}VNĐ`}</TableCell>
+                                        <TableCell>{`${getProductPriceById(product.productId).toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}`}</TableCell>
 
                                         <TableCell>
                                             <TextField
@@ -567,7 +575,7 @@ export default function QuotationsView() {
                                             />
                                         </TableCell>
 
-                                        <TableCell>{`${calculateSubtotal(product.productId, product.quantity)}VNĐ`}</TableCell>
+                                        <TableCell>{`${calculateSubtotal(product.productId, product.quantity)}`}</TableCell>
 
                                         <TableCell>{`${getProductTaxById(product.productId) * 100}%`}</TableCell>
 
@@ -596,10 +604,10 @@ export default function QuotationsView() {
                 <DialogActions>
                     <div style={{ flexGrow: 1, marginLeft: '16px' }}>
                         <Typography variant="body1">
-                            {`Total without tax: ${calculateTotal()}VNĐ`}
+                            {`Total without tax: ${calculateTotal()}`}
                         </Typography>
                         <Typography variant="body1">
-                            {`Total with tax: ${calculateTotalWithTax()}VNĐ`}
+                            {`Total with tax: ${calculateTotalWithTax()}`}
                         </Typography>
                     </div>
                     <Button onClick={handleCloseCreateDialog} variant="outlined" color="primary">
