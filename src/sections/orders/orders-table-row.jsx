@@ -185,7 +185,7 @@ export default function QuotationTableRow({
   const fetchQuotationDetails = async (quotationId) => {
     try {
       const token = localStorage.getItem('jwttoken');
-      const response = await fetch(`${API_BASE_URL}/api/Orders/{id}`, {
+      const response = await fetch(`${API_BASE_URL}/api/Orders/${quotationId}`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -341,7 +341,7 @@ export default function QuotationTableRow({
                         <TableRow key={detail.id}>
                           <TableCell>{detail.product.name}</TableCell>
                           <TableCell>{detail.quantity}</TableCell>
-                          <TableCell>{detail.subTotal}VNĐ</TableCell>
+                          <TableCell>{detail.subTotal.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}</TableCell>
                           <TableCell>{detail.product.tax * 100}%</TableCell>
                         </TableRow>
                       ))}
@@ -351,7 +351,7 @@ export default function QuotationTableRow({
                         <TableCell colSpan={2} className="text-right">
                           <Typography variant="strong">Total:</Typography>
                         </TableCell>
-                        <TableCell>{total}VNĐ</TableCell>
+                        <TableCell>{total.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}</TableCell>
                       </TableRow>
                     </TableBody>
                   </Table>
@@ -375,7 +375,7 @@ export default function QuotationTableRow({
 
         <Dialog open={openConfirmDialog} onClose={handleCloseConfirmDialog}>
           <DialogTitle>Confirm</DialogTitle>
-          <DialogContent>Are you sure you want to confirm this quotation?</DialogContent>
+          <DialogContent>Are you sure you want to confirm this Order?</DialogContent>
           <DialogActions>
             <Button onClick={handleCloseConfirmDialog} variant="outlined" color="primary">
               Leave
