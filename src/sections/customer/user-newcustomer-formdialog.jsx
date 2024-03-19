@@ -45,7 +45,7 @@ export default function FormDialog() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post('https://localhost:7196/api/Customer/AddCustomerX', formDataAdd, {
+      const response = await axios.post('https://localhost:7196/api/Customer/AddCustomer', formDataAdd, {
         headers: {
           'Content-Type': 'application/json'
         }

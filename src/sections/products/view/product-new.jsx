@@ -12,6 +12,12 @@ import Autocomplete from '@mui/material/Autocomplete';
 import DialogContent from '@mui/material/DialogContent';
 import DialogActions from '@mui/material/DialogActions';
 import CircularProgress from '@mui/material/CircularProgress';
+// Firebase storage configuration
+import { imageDb } from '../../../utils/Config';
+
+// Firebase storage functions
+import { ref, getDownloadURL, listAll, uploadBytes } from 'firebase/storage';
+import { v4 } from 'uuid';
 
 import Iconify from 'src/components/iconify';
 
@@ -76,6 +82,24 @@ export default function AddProductDialog({ open, onClose, onAddProduct }) {
   };
 
   const handleAddProduct = async () => {
+    if (product.imageUrls.length > 0) {
+      // Assuming img is not used in your component and you want to upload all images in imageUrls
+      const promises = product.imageUrls.map((img) => {
+        const imgRef = ref(imageDb, `files/${v4()}`);
+        return uploadBytes(imgRef, img).then((value) => {
+          return getDownloadURL(value.ref);
+        });
+      });
+
+      Promise.all(promises)
+        .then((urls) => {
+          setProduct((prevProduct) => ({ ...prevProduct, imageUrls: [...prevProduct.imageUrls, ...urls] }));
+        })
+        .catch((error) => {
+          console.error('Error uploading images:', error);
+        });
+    }
+
     const taxRegex = /^\d+(\.\d{1,2})?$/;
 
     if (

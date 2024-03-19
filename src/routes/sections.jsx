@@ -21,6 +21,7 @@ export const ForgetPage = lazy(() => import('src/pages/forget'));
 
 export default function Router() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [accountInfo, setAccountInfo] = useState({}); 
   const updateAuthentication = (value) => {
     setIsAuthenticated(value);
   };
@@ -62,13 +63,45 @@ export default function Router() {
   
     // Check authentication on component mount
     checkAuthentication();
-  }, []); // Empty dependency array for initial mount only
+    const getAccountInfo = async () => {
+      try {
+        const token = localStorage.getItem('jwttoken');
+        if (token) {
+          const response = await fetch(`${API_BASE_URL}/api/account/accountInfo`, {
+            headers: {
+              Accept: 'application/json',
+              Authorization: `Bearer ${token}`,
+            },
+          });
+  
+          if (response.ok) {
+            const data = await response.json();
+            setAccountInfo({
+              displayName: data.name,
+              role: data.role ? 'Admin' : 'User',
+              email: data.email,
+            });
+          } else {
+            console.error('Error fetching account info:', response.statusText);
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching account info:', error.message);
+      }
+    };
+  
+    if (isAuthenticated) {
+      getAccountInfo();
+    }
+  }, [isAuthenticated]); // Empty dependency array for initial mount only
+
+    
   
 
   const routes = useRoutes([
     {
       element: isAuthenticated ? (
-        <DashboardLayout>
+        <DashboardLayout accountInfo={accountInfo}>
           <Suspense>
             <Outlet />
           </Suspense>
@@ -89,7 +122,7 @@ export default function Router() {
     },
     {
       path: 'login',
-      element: <LoginPage isAuthenticated={isAuthenticated} updateAuthentication={updateAuthentication} />
+      element: <LoginPage isAuthenticated={isAuthenticated} updateAuthentication={updateAuthentication}/>
     },
     {
       path: 'forget',
