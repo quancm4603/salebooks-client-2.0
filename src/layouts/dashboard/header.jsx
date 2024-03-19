@@ -19,10 +19,11 @@ import { NAV, HEADER } from './config-layout';
 import AccountPopover from './common/account-popover';
 import LanguagePopover from './common/language-popover';
 import NotificationsPopover from './common/notifications-popover';
+import { API_BASE_URL } from '../../../config';
 
 // ----------------------------------------------------------------------
 
-export default function Header({ onOpenNav }) {
+export default function Header({ onOpenNav, accountInfo }) {
   const theme = useTheme();
   const [loggedIn, setLoggedIn] = useState(false);
   const [email, setEmail] = useState("");
@@ -41,6 +42,34 @@ export default function Header({ onOpenNav }) {
     }
   }, []);
 
+  // useEffect(() => {
+  //   const getAccountInfo = async () => {
+  //     try {
+  //       const response = await fetch(`${API_BASE_URL}/api/Account/accountInfo`, {
+  //         headers: {
+  //           Accept: 'application/json',
+  //           Authorization: `Bearer ${token}`,
+  //         },
+  //       });
+
+  //       if (response.ok) {
+  //         const data = await response.json();
+  //         setAccountInfo({
+  //           displayName: data.name,
+  //           role: data.role ? 'Admin' : 'User',
+  //           email: data.email,
+  //         });
+  //       } else {
+  //         console.error('Error fetching account info:', response.statusText);
+  //       }
+  //     } catch (error) {
+  //       console.error('Error fetching account info:', error.message);
+  //     }
+  //   };
+
+  //   getAccountInfo();
+  // }, [token]);
+
   const lgUp = useResponsive('up', 'lg');
 
   const renderContent = (
@@ -58,7 +87,13 @@ export default function Header({ onOpenNav }) {
       <Stack direction="row" alignItems="center" spacing={1}>
         <LanguagePopover />
         <NotificationsPopover />
-        <AccountPopover loggedIn={loggedIn} setLoggedIn={setLoggedIn} token={token} setToken={setToken}/>
+        <AccountPopover
+          loggedIn={loggedIn}
+          setLoggedIn={setLoggedIn}
+          token={token}
+          setToken={setToken}
+          accountInfo={accountInfo} // Pass accountInfo as a prop
+        />
       </Stack>
     </>
   );
@@ -95,4 +130,5 @@ export default function Header({ onOpenNav }) {
 
 Header.propTypes = {
   onOpenNav: PropTypes.func,
+  accountInfo: PropTypes.object.isRequired,
 };

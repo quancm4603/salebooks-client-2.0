@@ -9,12 +9,12 @@ import Header from './header';
 
 // ----------------------------------------------------------------------
 
-export default function DashboardLayout({ children }) {
+export default function DashboardLayout({ children, accountInfo }) {
   const [openNav, setOpenNav] = useState(false);
 
   return (
     <>
-      <Header onOpenNav={() => setOpenNav(true)} />
+      <Header onOpenNav={() => setOpenNav(true)} accountInfo={accountInfo} />
 
       <Box
         sx={{
@@ -33,4 +33,5 @@ export default function DashboardLayout({ children }) {
 
 DashboardLayout.propTypes = {
   children: PropTypes.node,
+  accountInfo: PropTypes.object.isRequired, // Add prop type for accountInfo
 };

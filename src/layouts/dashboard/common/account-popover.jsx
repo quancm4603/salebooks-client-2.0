@@ -38,9 +38,16 @@ AccountPopover.propTypes = {
   setLoggedIn: PropTypes.func,
   token: PropTypes.string,
   setToken: PropTypes.func,
+  accountInfo: PropTypes.object, // Add prop type for accountInfo
 };
 
-export default function AccountPopover({ loggedIn, setLoggedIn, token, setToken }) {
+export default function AccountPopover({
+  loggedIn,
+  setLoggedIn,
+  token,
+  setToken,
+  accountInfo,
+}) {
   const [open, setOpen] = useState(null);
   const navigate = useNavigate();
   const [account, setAccount] = useState({});
@@ -68,36 +75,36 @@ export default function AccountPopover({ loggedIn, setLoggedIn, token, setToken 
 
   
 
-  useEffect(() => {
-    console.log('token account popo :', localStorage.getItem('jwttoken'));
-    setToken(localStorage.getItem('jwttoken'));
+  // useEffect(() => {
+  //   console.log('token account popo :', localStorage.getItem('jwttoken'));
+  //   setToken(localStorage.getItem('jwttoken'));
 
-    const getAccountInfo = async () => {
-      try {
-        const response = await fetch(`${API_BASE_URL}/api/Account/accountInfo`, {
-          headers: {
-            Accept : 'application/json',
-            Authorization: `Bearer ${token}`,
-          },
-        });
+  //   const getAccountInfo = async () => {
+  //     try {
+  //       const response = await fetch(`${API_BASE_URL}/api/Account/accountInfo`, {
+  //         headers: {
+  //           Accept : 'application/json',
+  //           Authorization: `Bearer ${token}`,
+  //         },
+  //       });
 
-        if (response.ok) {
-          const data = await response.json();
-          setAccount({
-            displayName: data.name,
-            role: data.role ? 'Admin' : 'User',
-            email: data.email,
-          });
-        } else {
-          console.error('Error fetching account info:', response.statusText);
-        }
-      } catch (error) {
-        console.error('Error fetching account info:', error.message);
-      }
-    };
+  //       if (response.ok) {
+  //         const data = await response.json();
+  //         setAccount({
+  //           displayName: data.name,
+  //           role: data.role ? 'Admin' : 'User',
+  //           email: data.email,
+  //         });
+  //       } else {
+  //         console.error('Error fetching account info:', response.statusText);
+  //       }
+  //     } catch (error) {
+  //       console.error('Error fetching account info:', error.message);
+  //     }
+  //   };
 
-    getAccountInfo();
-  }, [token, setToken]);
+  //   getAccountInfo();
+  // }, [token, setToken]);
 
   return (
     <>
