@@ -613,7 +613,7 @@ function SellersPage() {
                 headLabel={[
                   { id: 'name', label: 'Name' },
                   { id: 'email', label: 'Email' },
-                  { id: 'phoneNumber', label: 'Phone Number check' },
+                  { id: 'phoneNumber', label: 'Phone Number' },
                   { id: 'role', label: 'Role' },
                   { id: 'password', label: 'Password', },
                   { id: '' },
