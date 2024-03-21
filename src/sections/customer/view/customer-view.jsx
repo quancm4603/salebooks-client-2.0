@@ -145,7 +145,11 @@ export default function UserPage() {
       <Stack direction="row" alignItems="center" justifyContent="space-between" mb={5}>
         <Typography variant="h4">Customer</Typography>
         
-        <FormDialog /> {/* Thêm component FormDialog vào đây */}
+        <FormDialog 
+        fetchCustomers={fetchCustomers} 
+        
+        
+        /> {/* Thêm component FormDialog vào đây : Add new customer form */}
       </Stack>
       <Card>
         <UserTableToolbar
