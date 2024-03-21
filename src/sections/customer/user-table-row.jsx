@@ -41,7 +41,8 @@ export default function UserTableRow({
   role,
   status,
   handleClick,
-  customerId
+  customerId,
+  fetchCustomers
 }) {
 
 
@@ -200,7 +201,8 @@ export default function UserTableRow({
 
     window.setTimeout(() => {
       setOpenDialog(false);
-    }, 1000); // 1000 milliseconds = 1 giây
+      fetchCustomers();
+    }, 200); // 1000 milliseconds = 1 giây
 
     Swal.fire({
       title: 'Success',
@@ -216,7 +218,8 @@ export default function UserTableRow({
 
     window.setTimeout(() => {
       setOpenDialogDetail(false);
-    }, 1000); // 1000 milliseconds = 1 giây
+      fetchCustomers();
+    }, 200); // 1000 milliseconds = 1 giây
 
     Swal.fire({
       title: "Error",
@@ -939,4 +942,6 @@ UserTableRow.propTypes = {
   role: PropTypes.any,
   selected: PropTypes.any,
   status: PropTypes.string,
+  fetchCustomers: PropTypes.func,
+
 };

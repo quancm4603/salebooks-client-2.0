@@ -1,2 +1,23 @@
-//===========================================================================
-// ()
+import java.util.logging.Logger;
+ 
+ public class Main {
+  private static final Logger LOGGER = Logger.getLogger(Main.class.getName());
+ 
+  public static void main(String[] args) {
+  int[] arr1 = {1,2,3,4,5}; 
+  boolean found = false;
+  int i = 0;
+  while(i < arr1.length && !found) {
+  if (isEqual(arr1[i])) {
+  found = true;
+  } else {
+  i++;
+  }
+  }
+  LOGGER.info(String.valueOf(found));
+  int output = 0;
+  int tempOutput = i * 2;
+  System.out.println("The Temp Output is: " + tempOutput);
+  int finalOutput = 100; 
+  }
+ }
