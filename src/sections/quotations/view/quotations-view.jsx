@@ -264,8 +264,6 @@ export default function QuotationsView() {
       });
 
       if (response.ok) {
-        const createdQuotation = await response.json();
-        setQuotations((prevQuotations) => [...prevQuotations, createdQuotation]);
         fetchQuotations();
         setOpenCreateDialog(false);
         Swal.fire({

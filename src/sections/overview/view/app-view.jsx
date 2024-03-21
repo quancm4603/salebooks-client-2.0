@@ -115,7 +115,7 @@ export default function AppView() {
   return (
     <Container maxWidth="xl">
       <Grid container spacing={3}>
-        <Grid xs={12} sm={6} md={3}>
+        <Grid xs={12} sm={6} md={4}>
           <AppWidgetSummary
             title="Total Users"
             total={userCount}
@@ -124,7 +124,7 @@ export default function AppView() {
           />
         </Grid>
 
-        <Grid xs={12} sm={6} md={3}>
+        <Grid xs={12} sm={6} md={4}>
           <AppWidgetSummary
             title="Item Orders"
             total={countFullyInvoicedQuotations()}
@@ -133,7 +133,7 @@ export default function AppView() {
           />
         </Grid>
 
-        <Grid xs={12} sm={6} md={6}>
+        <Grid xs={12} sm={6} md={4}>
           <AppWidgetSummary
             title="Quotation Needs To Be Confirmed"
             total={countQuotationQuotations()}
@@ -142,7 +142,7 @@ export default function AppView() {
           />
         </Grid>
 
-        <Grid xs={12} md={6} lg={8}>
+        <Grid xs={12} md={6} lg={12}>
           <AppWebsiteVisits
             title="Spend Under Managerment"
             chart={{
@@ -176,21 +176,7 @@ export default function AppView() {
               ],
             }}
           />
-        </Grid>
-
-        <Grid xs={12} md={6} lg={4}>
-          <AppCurrentVisits
-            title="Current Visits"
-            chart={{
-              series: [
-                { label: 'America', value: 4344 },
-                { label: 'Asia', value: 5435 },
-                { label: 'Europe', value: 1443 },
-                { label: 'Africa', value: 4443 },
-              ],
-            }}
-          />
-        </Grid>      
+        </Grid>     
       </Grid>
     </Container>
   );
