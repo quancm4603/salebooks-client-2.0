@@ -194,6 +194,8 @@ export default function UserPage() {
                       customerId={row.customerId}
                       selected={selected.indexOf(row.name) !== -1}
                       handleClick={(event) => handleClick(event, row.name)}
+                      fetchCustomers={fetchCustomers} 
+
                     />
                   ))}
                 <TableEmptyRows
