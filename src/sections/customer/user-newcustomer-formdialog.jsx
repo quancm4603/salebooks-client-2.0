@@ -3,6 +3,8 @@ import { useState, useEffect } from 'react';
 import Swal from 'sweetalert2';
 import Iconify from 'src/components/iconify';
 import axios from 'axios';
+import PropTypes from 'prop-types';
+
 
 
 import { Button, TextField, Dialog, Grid, DialogActions, DialogContent, DialogContentText, DialogTitle, Select, MenuItem, FormControl, InputLabel } from '@mui/material';
@@ -10,7 +12,9 @@ import { Button, TextField, Dialog, Grid, DialogActions, DialogContent, DialogCo
 import { API_BASE_URL } from '../../../config';
 
 
-export default function FormDialog() {
+export default function FormDialog({
+  fetchCustomers
+}) {
   const [open, setOpen] = React.useState(false);
   const [formDataAdd, setFormDataAdd] = useState({
     name: '',
@@ -109,6 +113,8 @@ export default function FormDialog() {
         },
       });
 
+
+
       // Kiểm tra xem yêu cầu có thành công hay không
       if (response.status === 200) {
         console.log('Customer added successfully:', response.data);
@@ -116,7 +122,7 @@ export default function FormDialog() {
         // Đóng dialog sau khi thêm khách hàng
         window.setTimeout(() => {
           setOpen(false);
-        }, 1000); // 1000 milliseconds = 1 giây
+        }, 200); // 1000 milliseconds = 1 giây
 
         // Hiển thị thông báo thành công
         Swal.fire({
@@ -130,7 +136,7 @@ export default function FormDialog() {
           // Kiểm tra nếu người dùng đã ấn nút OK
           if (result.isConfirmed) {
             // Tải lại trang để cập nhật dữ liệu
-            window.location.reload();
+            fetchCustomers();
           }
         });
       } else {
@@ -435,3 +441,8 @@ export default function FormDialog() {
     </>
   );
 }
+
+FormDialog.propTypes = {
+  
+  fetchCustomers: PropTypes.func,
+};
