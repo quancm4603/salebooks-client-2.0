@@ -14,7 +14,14 @@ export default function DashboardLayout({ children, accountInfo }) {
 
   return (
     <>
-      <Header onOpenNav={() => setOpenNav(true)} accountInfo={accountInfo} />
+      <Header
+        onOpenNav={() => {
+          if (!openNav) {
+            setOpenNav(true);
+          }
+        }}
+        accountInfo={accountInfo}
+      />
 
       <Box
         sx={{
@@ -23,7 +30,7 @@ export default function DashboardLayout({ children, accountInfo }) {
           flexDirection: { xs: 'column', lg: 'row' },
         }}
       >
-        <Nav openNav={openNav} onCloseNav={() => setOpenNav(false)} />
+        <Nav openNav={openNav} onCloseNav={() => setOpenNav(false)} accountInfo={accountInfo} />
 
         <Main>{children}</Main>
       </Box>
