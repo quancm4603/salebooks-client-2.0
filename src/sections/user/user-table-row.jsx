@@ -137,7 +137,7 @@ export default function SellerTableRow({
 
       <Dialog open={openDialog} onClose={handleCloseDialog}>
         <DialogTitle>Confirm Delete</DialogTitle>
-        <DialogContent>Are you sure you want to delete this item?</DialogContent>
+        <DialogContent>Are you sure you want to delete this seller?</DialogContent>
         <DialogActions>
           <Button onClick={handleDeleteConfirmed} variant="contained" color="error">
             Delete
