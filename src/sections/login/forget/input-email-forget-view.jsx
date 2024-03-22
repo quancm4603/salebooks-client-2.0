@@ -1,9 +1,11 @@
 import axios from 'axios';
-import Swal from 'sweetalert2';
 import React, { useState } from 'react';
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
 import InputAdornment from '@mui/material/InputAdornment';
+import Swal from 'sweetalert2';
+import MuiAlert from '@mui/material/Alert';
+import Snackbar from '@mui/material/Snackbar';
 import IconButton from '@mui/material/IconButton';
 import Stack from '@mui/material/Stack';
 import LinearProgress from '@mui/material/LinearProgress'; // Thêm LinearProgress
@@ -14,11 +16,15 @@ import { useNavigate } from 'react-router-dom';
 
 import { API_BASE_URL } from '../../../../config';
 
+
+
 export default function EnterEmail() {
   const [email, setEmail] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [openDialog, setOpenDialog] = useState(false);
+  const [open, setOpen] = useState(false);
+  const [showSuccessAlert, setShowSuccessAlert] = useState(false);
   const [otp, setOtp] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -47,17 +53,15 @@ export default function EnterEmail() {
         setError('Email does not exist');
       }
     } catch (exception) {
-      Swal.fire({
-        icon: "error",
-        title: "Oops...",
-        text: "Email is Wrong!",
-      });
-      setError('Email is Wrong!.');
+      setError('Email is Wrongs!');
+      setOpen(true);
     } finally {
       setCheckingEmail(false); // Kết thúc kiểm tra email
     }
   };
-
+  const onClose = () => {
+    setOpen(false);
+  };
   const handleCloseDialog = () => {
     setOpenDialog(false);
     setOtp('');
@@ -75,23 +79,15 @@ export default function EnterEmail() {
       formData.append('NewPassword', confirmPassword);
 
       if (!otp || !password || !confirmPassword) {
-        handleCloseDialog();
-        Swal.fire({
-          icon: "error",
-          title: "Oops...",
-          text: "Fill in all fields!",
-        });
+        setOpen(true);
+        setError('Please fill in all fields!'); // Set error message
         return;
       }
 
       if (password !== confirmPassword) {
         setOtpMismatch(true); // Set OTP mismatch state
-        handleCloseDialog();
-        Swal.fire({
-          icon: "error",
-          title: "Oops...",
-          text: "Passwords do not match!",
-        });
+        setOpen(true);
+        setError('Password do not match!'); // Set error message
         return;
       }
 
@@ -106,22 +102,14 @@ export default function EnterEmail() {
           navigate('/');
         });
       } else {
-        handleCloseDialog();
-        Swal.fire({
-          icon: "error",
-          title: "Oops...",
-          text: "Something went wrong!",
-          footer: '<a href="#">Why do I have this issue?</a>'
-        });
+        setOtpMismatch(true); // Set OTP mismatch state
+        setOpen(true);
+        setError('OTP do not match!'); // Set error message          
       }
     } catch (exception) {
-      handleCloseDialog();
       setOtpMismatch(true); // Set OTP mismatch state
-      Swal.fire({
-        icon: "error",
-        title: "Oops...",
-        text: "OTP is Wrong!",
-      });
+      setOpen(true);
+      setError('OTP do not match!'); // Set error message
     }
   };
 
@@ -130,6 +118,7 @@ export default function EnterEmail() {
       <Stack alignItems="center" justifyContent="center" sx={{ height: '100vh' }} spacing={3}>
         <Card sx={{ p: 5, width: 1, maxWidth: 420 }}>
           <Typography variant="h4">Your Email Forget</Typography>
+
           <form >
             <Stack spacing={3}>
               <TextField
@@ -143,7 +132,7 @@ export default function EnterEmail() {
               />
 
 
-              
+
             </Stack>
             {checkingEmail && <LinearProgress color="secondary" fourColor variant="indeterminate" />} {/* Thay thế LoadingButton bằng LinearProgress */}
             <Button // Thay thế LoadingButton bằng Button để tạm thời vô hiệu hóa nút khi đang kiểm tra email
@@ -156,8 +145,31 @@ export default function EnterEmail() {
             >
               Submit
             </Button>
-            {error && <Typography variant="body1" color="error">{error}</Typography>}
+
           </form>
+          <Dialog
+            open={open}
+            onClose={onClose}
+            sx={{
+              width: '80%', // Thiết lập chiều rộng của Dialog
+              margin: 'auto', // Đưa Dialog vào giữa
+              maxWidth: '600px', // Đặt kích thước tối đa cho Dialog
+            }}
+          >
+            <DialogContent sx={{ padding: '24px 48px', textAlign: 'center' }}>
+              <Typography variant="h5" color="error" gutterBottom>
+                Fail to Enter
+              </Typography>
+              <Typography gutterBottom>{error}</Typography>
+            </DialogContent>
+            <DialogActions sx={{ padding: '16px 24px', justifyContent: 'center' }}>
+              <Button onClick={onClose} color="primary">
+                OK
+              </Button>
+            </DialogActions>
+          </Dialog>
+
+
 
           <Dialog open={openDialog} onClose={handleCloseDialog}>
             <Stack alignItems="center" justifyContent="center" sx={{ height: 1 }} spacing={3}>

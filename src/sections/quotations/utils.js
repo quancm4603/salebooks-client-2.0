@@ -59,9 +59,17 @@ export function applyFilter({ inputData, comparator, filterName }) {
   inputData = stabilizedThis.map((el) => el[0]);
 
   if (filterName) {
-    inputData = inputData.filter(
-      (quotation) => quotation.customer.name.toLowerCase().indexOf(filterName.toLowerCase()) !== -1
-    );
+    const searchTerm = filterName.toLowerCase().trim();
+    inputData = inputData.filter(quotation => {
+      const status = quotation.status.toLowerCase();
+      const customerName = quotation.customer.name.toLowerCase();
+      const date = quotation.createdAt.toLowerCase();
+
+      if (searchTerm.includes("order") || searchTerm === "o" || searchTerm === "ord" || searchTerm === "or" || searchTerm === "orde") {
+        return status === "fully invoice" || status === "to invoice";
+      }
+      return customerName.includes(searchTerm) || status.includes(searchTerm);
+    });
   }
 
   return inputData;

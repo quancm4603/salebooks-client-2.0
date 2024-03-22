@@ -30,7 +30,7 @@ export default function UserPage() {
   const [selected, setSelected] = useState([]);
   const [orderBy, setOrderBy] = useState('name');
   const [filterName, setFilterName] = useState('');
-  const [rowsPerPage, setRowsPerPage] = useState(5);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
   const [customers, setCustomers] = useState([]); // State để lưu trữ dữ liệu khách hàng từ API
 
 
@@ -145,7 +145,11 @@ export default function UserPage() {
       <Stack direction="row" alignItems="center" justifyContent="space-between" mb={5}>
         <Typography variant="h4">Customer</Typography>
         
-        <FormDialog /> {/* Thêm component FormDialog vào đây */}
+        <FormDialog 
+        fetchCustomers={fetchCustomers} 
+        
+        
+        /> {/* Thêm component FormDialog vào đây : Add new customer form */}
       </Stack>
       <Card>
         <UserTableToolbar
@@ -190,6 +194,8 @@ export default function UserPage() {
                       customerId={row.customerId}
                       selected={selected.indexOf(row.name) !== -1}
                       handleClick={(event) => handleClick(event, row.name)}
+                      fetchCustomers={fetchCustomers} 
+
                     />
                   ))}
                 <TableEmptyRows

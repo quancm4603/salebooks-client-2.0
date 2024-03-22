@@ -69,6 +69,7 @@ export default function SellerTableRow({
       });
       if (response.ok) {
         handleCloseDialog();
+        onUpdate(id);
         Swal.fire({
           icon: 'success',
           title: 'Success',

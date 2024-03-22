@@ -59,9 +59,13 @@ export function applyFilter({ inputData, comparator, filterName }) {
   inputData = stabilizedThis.map((el) => el[0]);
 
   if (filterName) {
-    inputData = inputData.filter(
-      (quotation) => quotation.customer.name.toLowerCase().indexOf(filterName.toLowerCase()) !== -1
-    );
+    inputData = inputData.filter(quotation => {
+      const searchTerm = filterName.toLowerCase();
+      return (
+        quotation.customer.name.toLowerCase().includes(searchTerm) ||
+        quotation.status.toLowerCase().includes(searchTerm)
+      );
+    });
   }
 
   return inputData;

@@ -41,7 +41,8 @@ export default function UserTableRow({
   role,
   status,
   handleClick,
-  customerId
+  customerId,
+  fetchCustomers
 }) {
 
 
@@ -200,7 +201,8 @@ export default function UserTableRow({
 
     window.setTimeout(() => {
       setOpenDialog(false);
-    }, 1000); // 1000 milliseconds = 1 giây
+      fetchCustomers();
+    }, 200); // 1000 milliseconds = 1 giây
 
     Swal.fire({
       title: 'Success',
@@ -216,7 +218,8 @@ export default function UserTableRow({
 
     window.setTimeout(() => {
       setOpenDialogDetail(false);
-    }, 1000); // 1000 milliseconds = 1 giây
+      fetchCustomers();
+    }, 200); // 1000 milliseconds = 1 giây
 
     Swal.fire({
       title: "Error",
@@ -447,7 +450,8 @@ const handleCloseMenuEdit = () => {
         <TableCell>{email}</TableCell>
         <TableCell>{mobile}</TableCell>
         <TableCell>{province}</TableCell>
-        <TableCell>{totalOrderValue !== null ? totalOrderValue.toFixed(2) : 'Loading...'}</TableCell> {/*  */}
+        <TableCell>{totalOrderValue !== null ? totalOrderValue.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' }) : 'Loading...'}</TableCell> {/*  */}
+
         {/*  */}
         <TableCell>{address}</TableCell>
 
@@ -939,4 +943,6 @@ UserTableRow.propTypes = {
   role: PropTypes.any,
   selected: PropTypes.any,
   status: PropTypes.string,
+  fetchCustomers: PropTypes.func,
+
 };
