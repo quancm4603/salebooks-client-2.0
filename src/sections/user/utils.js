@@ -47,9 +47,21 @@ export function applyFilter({ inputData, comparator, filterName }) {
   inputData = stabilizedThis.map((el) => el[0]);
 
   if (filterName) {
-    inputData = inputData.filter(
-      (user) => user.name.toLowerCase().indexOf(filterName.toLowerCase()) !== -1
-    );
+    inputData = inputData.filter((user) => {
+      // Filter by name
+      const nameMatch = user.name.toLowerCase().indexOf(filterName.toLowerCase()) !== -1;
+      // Filter by email
+      const emailMatch = user.email.toLowerCase().indexOf(filterName.toLowerCase()) !== -1;
+      // Filter by phoneNumber
+      const phoneNumberMatch = user.phoneNumber.toLowerCase().indexOf(filterName.toLowerCase()) !== -1;
+      // Filter by role
+      const roleMatch = user.role.toLowerCase().indexOf(filterName.toLowerCase()) !== -1;
+      // Filter by password
+      const passwordMatch = user.password.toLowerCase().indexOf(filterName.toLowerCase()) !== -1;
+
+      // Return true if any field matches the filterName
+      return nameMatch || emailMatch || phoneNumberMatch || roleMatch || passwordMatch;
+    });
   }
 
   return inputData;
