@@ -450,7 +450,8 @@ const handleCloseMenuEdit = () => {
         <TableCell>{email}</TableCell>
         <TableCell>{mobile}</TableCell>
         <TableCell>{province}</TableCell>
-        <TableCell>{totalOrderValue !== null ? totalOrderValue.toFixed(2) : 'Loading...'}</TableCell> {/*  */}
+        <TableCell>{totalOrderValue !== null ? totalOrderValue.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' }) : 'Loading...'}</TableCell> {/*  */}
+
         {/*  */}
         <TableCell>{address}</TableCell>
 
