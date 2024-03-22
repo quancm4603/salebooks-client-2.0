@@ -42,7 +42,7 @@ export default function QuotationTableToolbar({ numSelected, filterName, onFilte
         <OutlinedInput
           value={filterName}
           onChange={onFilterName}
-          placeholder="Search Quotaion..."
+          placeholder="Search order..."
           startAdornment={
             <InputAdornment position="start">
               <Iconify
