@@ -37,6 +37,7 @@ export default function Nav({ openNav, onCloseNav, accountInfo }) {
     // if (openNav) {
     //   onCloseNav();
     // }
+    console.log('Account Info:', accountInfo);
     setAccount({
       displayName: accountInfo.name,
       role: accountInfo.role === true ? 'Admin' : 'User',
@@ -58,13 +59,13 @@ export default function Nav({ openNav, onCloseNav, accountInfo }) {
         bgcolor: (theme) => alpha(theme.palette.grey[500], 0.12),
       }}
     >
-      <Avatar src={account.photoURL} alt="photoURL" />
+      <Avatar src={accountInfo.photoURL} alt="photoURL" />
 
       <Box sx={{ ml: 2 }}>
-        <Typography variant="subtitle2">{account.displayName}</Typography>
+        <Typography variant="subtitle2">{accountInfo.displayName}</Typography>
 
         <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-          {account.role}
+          {accountInfo.role}
         </Typography>
       </Box>
     </Box>
