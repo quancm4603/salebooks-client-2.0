@@ -124,6 +124,7 @@ export default function FormDialog({
         // Đóng dialog sau khi thêm khách hàng
         window.setTimeout(() => {
           setOpen(false);
+          fetchCustomers();
         }, 200); // 1000 milliseconds = 1 giây
 
         // Hiển thị thông báo thành công
@@ -150,6 +151,7 @@ export default function FormDialog({
       // Đóng dialog sau khi thêm khách hàng
       window.setTimeout(() => {
         setOpen(false);
+        fetchCustomers();
       }, 200); // 1000 milliseconds = 1 giây
 
       // Hiển thị thông báo lỗi
