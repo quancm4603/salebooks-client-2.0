@@ -91,6 +91,8 @@ export default function FormDialog({
       return;
     }
 
+    
+
     // If all validations pass, proceed with form submission
     // Add your form submission logic here
     console.log('Form submitted:', formDataAdd);
@@ -129,7 +131,7 @@ export default function FormDialog({
           title: 'Success',
           text: 'Customer added successfully',
           icon: 'success',
-          timer: 30000, // Thời gian hiển thị thông báo (ms)
+          timer: 500, // Thời gian hiển thị thông báo (ms)
           timerProgressBar: true, // Hiển thị thanh tiến trình
           showConfirmButton: true, // Ẩn nút xác nhận
         }).then((result) => {
@@ -148,14 +150,14 @@ export default function FormDialog({
       // Đóng dialog sau khi thêm khách hàng
       window.setTimeout(() => {
         setOpen(false);
-      }, 1000); // 1000 milliseconds = 1 giây
+      }, 200); // 1000 milliseconds = 1 giây
 
       // Hiển thị thông báo lỗi
       Swal.fire({
         title: 'Error',
         text: 'An error occurred while adding new customer. Please try again.',
         icon: 'error',
-        timer: 30000, // Thời gian hiển thị thông báo (ms)
+        timer: 500, // Thời gian hiển thị thông báo (ms)
         timerProgressBar: true, // Hiển thị thanh tiến trình
         showConfirmButton: true, // Ẩn nút xác nhận
       });
