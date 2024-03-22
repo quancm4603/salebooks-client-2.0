@@ -56,11 +56,9 @@ export function applyFilter({ inputData, comparator, filterName }) {
       const phoneNumberMatch = user.phoneNumber.toLowerCase().indexOf(filterName.toLowerCase()) !== -1;
       // Filter by role
       const roleMatch = user.role.toLowerCase().indexOf(filterName.toLowerCase()) !== -1;
-      // Filter by password
-      const passwordMatch = user.password.toLowerCase().indexOf(filterName.toLowerCase()) !== -1;
 
       // Return true if any field matches the filterName
-      return nameMatch || emailMatch || phoneNumberMatch || roleMatch || passwordMatch;
+      return nameMatch || emailMatch || phoneNumberMatch || roleMatch;
     });
   }
 

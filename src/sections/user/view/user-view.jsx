@@ -117,71 +117,7 @@ function SellersPage() {
       phoneNumber: '',
     });
   };
-  const handleEditSellerFormChange = (event) => {
-    const { name, value, type, checked } = event.target;
-    setEditSellerFormData((prevData) => ({
-      ...prevData,
-      [name]: type === 'checkbox' ? checked : value,
-    }));
 
-    // Xóa thông báo lỗi trước đó khi người dùng bắt đầu chỉnh sửa form
-    setEditSellerError(null);
-  };
-
-  const handleEditSeller = async () => {
-    try {
-      const token = localStorage.getItem('jwttoken');
-
-      // Validation
-      if (!editSellerFormData.name) {
-        setEditSellerError('Please fill in the name field.'); // Set thông báo lỗi
-        return;
-      }
-
-      if (!editSellerFormData.email || !/^\S+@\S+\.\S+$/.test(editSellerFormData.email)) {
-        setEditSellerError('Please provide a valid email address.'); // Set thông báo lỗi
-        return;
-      }
-
-      if (!editSellerFormData.phoneNumber || isNaN(editSellerFormData.phoneNumber) || editSellerFormData.phoneNumber.length !== 10) {
-        setEditSellerError('Please provide a valid 10-digit phone number.'); // Set error message
-        return;
-      }
-
-      if (!editSellerFormData.password || editSellerFormData.password.length < 6 || !/[!@#$%^&*(),.?":{}|<>]/.test(editSellerFormData.password)) {
-        setEditSellerError('Password must have at least 6 characters, and must contain special characters.'); // Set error message
-        return;
-      }
-
-      const requestData = {
-        id: editSellerFormData.id,
-        name: editSellerFormData.name,
-        role: editSellerFormData.role,
-        email: editSellerFormData.email,
-        password: editSellerFormData.password,
-        phoneNumber: editSellerFormData.phoneNumber,
-      };
-      await axios.patch(`${API_BASE_URL}/api/Seller/UpdateSeller/${editSellerFormData.id}`, requestData, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      Swal.fire({
-        title: 'Success',
-        text: 'Seller updated successfully',
-        icon: 'success',
-      });
-      fetchSellers();
-      handleCloseEditSellerModal();
-    } catch (err) {
-      console.error('Error updating seller:', err);
-      Swal.fire({
-        title: 'Error',
-        text: 'An error occurred. Please try again.',
-        icon: 'error',
-      });
-    }
-  };
 
 
 
@@ -296,6 +232,8 @@ function SellersPage() {
   });
   const notFound = !dataFiltered.length && !!filterName;
   const [showSuccessSnackbar, setShowSuccessSnackbar] = useState(false);
+
+
   // Function to handle changes in Add Seller form fields
   const handleAddSellerFormChange = (event) => {
     const { name, value, type, checked } = event.target;
@@ -313,8 +251,8 @@ function SellersPage() {
       const token = localStorage.getItem('jwttoken');
 
       // Validation
-      if (!addSellerFormData.name) {
-        setAddSellerError('Please fill in the name field.'); // Set error message
+      if (!addSellerFormData.name || /[!@#$%^&*(),.?":{}|<>]/.test(addSellerFormData.name)) {
+        setAddSellerError('Please provide a valid name without special characters.'); // Set error message
         return;
       }
 
@@ -323,10 +261,11 @@ function SellersPage() {
         return;
       }
 
-      if (!addSellerFormData.phoneNumber || isNaN(addSellerFormData.phoneNumber) || addSellerFormData.phoneNumber.length !== 10) {
+      if (!addSellerFormData.phoneNumber || isNaN(addSellerFormData.phoneNumber) || addSellerFormData.phoneNumber.length !== 10 || !/^\d+$/.test(addSellerFormData.phoneNumber)) {
         setAddSellerError('Please provide a valid 10-digit phone number.'); // Set error message
         return;
       }
+
 
       if (!addSellerFormData.password || addSellerFormData.password.length < 6 || !/[!@#$%^&*(),.?":{}|<>]/.test(addSellerFormData.password)) {
         setAddSellerError('Password must have at least 6 characters, and must contain special characters.'); // Set error message
@@ -365,6 +304,79 @@ function SellersPage() {
       });
     }
   };
+
+
+
+
+  const handleEditSellerFormChange = (event) => {
+    const { name, value, type, checked } = event.target;
+    setEditSellerFormData((prevData) => ({
+      ...prevData,
+      [name]: type === 'checkbox' ? checked : value,
+    }));
+
+    // Xóa thông báo lỗi trước đó khi người dùng bắt đầu chỉnh sửa form
+    setEditSellerError(null);
+  };
+
+  const handleEditSeller = async () => {
+    try {
+      const token = localStorage.getItem('jwttoken');
+
+      // Validation
+      if (!editSellerFormData.name || /[!@#$%^&*(),.?":{}|<>]/.test(editSellerFormData.name)) {
+        setEditSellerError('Please provide a valid name without special characters.'); // Set error message
+        return;
+      }
+
+      if (!editSellerFormData.email || !/^\S+@\S+\.\S+$/.test(editSellerFormData.email)) {
+        setEditSellerError('Please provide a valid email address.'); // Set thông báo lỗi
+        return;
+      }
+
+      if (!editSellerFormData.phoneNumber || isNaN(editSellerFormData.phoneNumber) || editSellerFormData.phoneNumber.length !== 10 || !/^\d+$/.test(editSellerFormData.phoneNumber)) {
+        setEditSellerError('Please provide a valid 10-digit phone number.'); // Set error message
+        return;
+      }
+
+
+      if (!editSellerFormData.password || editSellerFormData.password.length < 6 || !/[!@#$%^&*(),.?":{}|<>]/.test(editSellerFormData.password)) {
+        setEditSellerError('Password must have at least 6 characters, and must contain special characters.'); // Set error message
+        return;
+      }
+
+      const requestData = {
+        id: editSellerFormData.id,
+        name: editSellerFormData.name,
+        role: editSellerFormData.role,
+        email: editSellerFormData.email,
+        password: editSellerFormData.password,
+        phoneNumber: editSellerFormData.phoneNumber,
+      };
+      await axios.patch(`${API_BASE_URL}/api/Seller/UpdateSeller/${editSellerFormData.id}`, requestData, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      Swal.fire({
+        title: 'Success',
+        text: 'Seller updated successfully',
+        icon: 'success',
+      });
+      fetchSellers();
+      handleCloseEditSellerModal();
+    } catch (err) {
+      console.error('Error updating seller:', err);
+      Swal.fire({
+        title: 'Error',
+        text: 'An error occurred. Please try again.',
+        icon: 'error',
+      });
+    }
+  };
+
+
+
 
   const handleExportToExcel = () => {
     try {
@@ -408,6 +420,9 @@ function SellersPage() {
       });
     }
   };
+
+
+
   return (
     <Container>
       <Stack direction="row" alignItems="center" justifyContent="space-between" mb={5}>
@@ -432,14 +447,14 @@ function SellersPage() {
               )}
               <TextField
                 fullWidth
-                label="Name"
+                label="Name*"
                 name="name"
                 value={addSellerFormData.name}
                 onChange={handleAddSellerFormChange}
                 variant="outlined"
               />
               <FormControl fullWidth variant="outlined">
-                <InputLabel id="role-label">Role</InputLabel>
+                <InputLabel id="role-label">Role*</InputLabel>
                 <Select
                   labelId="role-label"
                   id="role"
@@ -454,7 +469,7 @@ function SellersPage() {
               </FormControl>
               <TextField
                 fullWidth
-                label="PhoneNumber"
+                label="PhoneNumber*"
                 name="phoneNumber"
                 value={addSellerFormData.phoneNumber}
                 onChange={handleAddSellerFormChange}
@@ -462,7 +477,7 @@ function SellersPage() {
               />
               <TextField
                 fullWidth
-                label="Email"
+                label="Email*"
                 name="email"
                 value={addSellerFormData.email}
                 onChange={handleAddSellerFormChange}
@@ -470,7 +485,7 @@ function SellersPage() {
               />
               <TextField
                 fullWidth
-                label="Password"
+                label="Password*"
                 type={showAddSellerPassword ? 'text' : 'password'}
                 name="password"
                 value={addSellerFormData.password}
@@ -511,21 +526,21 @@ function SellersPage() {
               )}
               <TextField
                 fullWidth
-                label="Name"
+                label="Name*"
                 name="name"
                 value={editSellerFormData.name}
                 onChange={handleEditSellerFormChange}
                 variant="outlined"
               />
               <FormControl fullWidth variant="outlined">
-                <InputLabel id="role-label">Role</InputLabel>
+                <InputLabel id="role-label">Role*</InputLabel>
                 <Select
                   labelId="role-label"
                   id="role"
                   name="role"
                   value={editSellerFormData.role}
                   onChange={handleEditSellerFormChange}
-                  label="Role"
+                  label="Role*"
                 >
                   <MenuItem value={false}>User</MenuItem>
                   <MenuItem value>Admin</MenuItem>
@@ -533,7 +548,7 @@ function SellersPage() {
               </FormControl>
               <TextField
                 fullWidth
-                label="PhoneNumber"
+                label="PhoneNumber*"
                 name="phoneNumber"
                 value={editSellerFormData.phoneNumber}
                 onChange={handleEditSellerFormChange}
@@ -541,7 +556,7 @@ function SellersPage() {
               />
               <TextField
                 fullWidth
-                label="Email"
+                label="Email*"
                 name="email"
                 value={editSellerFormData.email}
                 onChange={handleEditSellerFormChange}
@@ -549,7 +564,7 @@ function SellersPage() {
               />
               <TextField
                 fullWidth
-                label="Password"
+                label="Password*"
                 type={showEditSellerPassword ? 'text' : 'password'}
                 name="password"
                 value={editSellerFormData.password}
