@@ -96,7 +96,7 @@ function CustomerOrderHistory({ customerId }) {
                                     Date: {formatDate(order.createdAt)}
                                     </Typography>
                                     <Typography variant="h5" component="div">
-                                    Total: {order.total}
+                                    Total: {order.total.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}
                                     </Typography>
                                    
                                 </CardContent>
